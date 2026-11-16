@@ -39,17 +39,33 @@ The full rules — palette table, the type stack with free substitutes, hierarch
 things this language refuses to do — are in **[DESIGN-LANGUAGE.md](DESIGN-LANGUAGE.md)**, and the
 values are in **[tokens.css](tokens.css)**.
 
-## Using the design without Hermes
+## Use it anywhere — not only in Hermes
 
-The look is not welded to this dashboard. `tokens.css` is plain CSS custom properties and
-`DESIGN-LANGUAGE.md` is a written spec, so a web project of any kind can adopt them:
+Being straight about it: the **YAML theme is Hermes-only**, because a theme file is written against
+one application's own theme schema. The **design is not**. Two files carry it, and they work in any
+web page, any framework, any assistant's interface:
 
-```html
-<link rel="stylesheet" href="tokens.css">
+```
+tokens.css            the palette, the type scale, the spacing — dark and light
+portable/nothing.css  the components, importing the tokens
+portable/example.html one page built from them
 ```
 
-The eight `mockups/*.html` pages are self-contained examples — open one in a browser and you are
-looking at the design, no server and no Hermes required:
+```html
+<link rel="stylesheet" href="portable/nothing.css">
+```
+
+That is the whole install: a card, a hero figure, a spec-sheet table, a status square, the red
+interrupt, and the shell around them — plain CSS custom properties, no build step, no JavaScript.
+`portable/README.md` lists every class and the three rules that make it look right; the variables
+are all in `tokens.css`, so you can ignore the classes entirely and style your own markup.
+
+![The portable example page](screenshots/example--desktop.png)
+
+*The example page, built only from `portable/nothing.css` — invented data, nothing to install.*
+
+The eight `mockups/*.html` pages go further: they are the full interface in this language, each one
+self-contained and openable in a browser with no server and no Hermes:
 
 ```bash
 xdg-open mockups/status.html        # or just drag it into a browser

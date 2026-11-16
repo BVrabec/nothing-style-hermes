@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nothing style — portable example</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@700&family=Space+Grotesk:wght@300;400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nothing.css">
+<!--
+  A single page built only from nothing.css: no framework, no build step, no JavaScript.
+  Every value on it is invented. Copy this file, change the words, and you have the design.
+-->
+</head>
+<body>
+<div class="app">
+
+  <aside class="rail">
+    <div class="rail__brand">Example&nbsp;Assistant</div>
+    <nav class="rail__nav">
+      <a href="#" aria-current="page">Status</a>
+      <a href="#">Runs</a>
+      <a href="#">Files</a>
+      <a href="#">Settings</a>
+    </nav>
+    <div style="margin-top:auto">
+      <div class="mono">node-01 · 192.0.2.10</div>
+      <div class="mono">uptime 12d 04h</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="header">
+      <span class="mono">status · this morning</span>
+      <span class="status">connected</span>
+    </header>
+
+    <!-- ONE red interrupt on the whole page, and only because something is wrong -->
+    <div class="banner">Backup volume is 94% full — act before it fills</div>
+
+    <!-- ONE hero figure -->
+    <section class="hero">
+      <span class="mono">jobs finished today</span>
+      <span class="figure">128</span>
+      <span class="note">Median 1.9 s each · two failed and were retried</span>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <span class="card__title">Queue</span>
+        <div class="readout"><span class="v">3</span><span class="u">waiting</span></div>
+        <div class="seg"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></div>
+      </div>
+      <div class="card">
+        <span class="card__title">Storage</span>
+        <div class="readout"><span class="v">61</span><span class="u">% used</span></div>
+        <div class="seg"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></div>
+      </div>
+      <div class="card">
+        <span class="card__title">Spend today</span>
+        <div class="readout"><span class="v">$0.42</span><span class="u">of $5.00</span></div>
+        <div class="kv"><span class="kv__k">last hour</span><span class="kv__v">$0.06</span></div>
+        <div class="kv"><span class="kv__k">projected</span><span class="kv__v">$1.10</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <span class="card__title">Services</span>
+      <table class="spec">
+        <thead>
+          <tr><th>name</th><th>state</th><th>version</th><th>last change</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>gateway</td><td><span class="status">running</span></td><td>0.21.5</td><td>2 h ago</td></tr>
+          <tr><td>indexer</td><td><span class="status">running</span></td><td>1.4.0</td><td>yesterday</td></tr>
+          <tr><td>worker</td><td><span class="status status--off">stopped</span></td><td>1.4.0</td><td>3 days ago</td></tr>
+          <tr><td>archive</td><td><span class="status status--down">failing</span></td><td>0.9.2</td><td>1 h ago</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <span class="card__title">Controls</span>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <button class="btn btn--primary">Run now</button>
+          <button class="btn">Pause</button>
+          <button class="btn btn--quiet">Details</button>
+          <button class="btn" disabled>Restart</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px">
+          <span class="toggle on"><span></span></span>
+          <span class="mono">notifications on</span>
+        </div>
+      </div>
+      <div class="card">
+        <span class="card__title">Switch the mode</span>
+        <p class="note">The same sheet is light and dark. Set <span class="mono">data-mode</span> on the
+        <span class="mono">&lt;html&gt;</span> element — the tokens do the rest.</p>
+        <div>
+          <button class="btn" onclick="document.documentElement.dataset.mode =
+            document.documentElement.dataset.mode === 'light' ? 'dark' : 'light'">Toggle light / dark</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="empty">nothing has run in the last hour</section>
+
+  </main>
+</div>
+</body>
+</html>

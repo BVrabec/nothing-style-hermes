@@ -1,0 +1,101 @@
+/* ============================================================
+   Nothing style — portable components
+   ------------------------------------------------------------
+   The tokens live in ../tokens.css and are imported here, so this
+   is the only file a project needs to link. Plain CSS custom
+   properties: no framework, no build step, no JavaScript.
+
+   Rules this sheet follows (see ../DESIGN-LANGUAGE.md):
+     · colour is an event, not decoration — the grey scale is the
+       hierarchy, and red #D71921 is used at most once per screen
+     · square corners, hairlines instead of shadows
+     · labels and data in mono, uppercase; one hero figure per screen
+     · dark is the primary mode; add data-mode="light" to switch
+   ============================================================ */
+@import url("../tokens.css");
+
+/* ---------- page shell: rail + main ---------- */
+.app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+.app--wide { grid-template-columns: 1fr; }
+
+.rail {
+  border-right: var(--hairline);
+  display: flex; flex-direction: column; gap: var(--s-6);
+  padding: var(--s-6) var(--s-4);
+}
+.rail__brand { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.12em;
+  text-transform: uppercase; }
+.rail__nav { display: flex; flex-direction: column; }
+.rail__nav a {
+  font-family: var(--font-mono); font-size: var(--text-label); text-transform: uppercase;
+  letter-spacing: 0.02em; color: var(--fg-3); text-decoration: none;
+  padding: var(--s-2) var(--s-2); border-left: 1px solid transparent;
+}
+.rail__nav a:hover { color: var(--fg); }
+.rail__nav a[aria-current='page'] { color: var(--fg); background: var(--sel); }
+
+.main { padding: var(--s-8); display: flex; flex-direction: column; gap: var(--s-8); }
+.header { display: flex; align-items: baseline; justify-content: space-between;
+  padding-bottom: var(--s-4); border-bottom: var(--hairline); }
+
+/* ---------- hero: the one thing the eye hits first ---------- */
+.hero { display: flex; flex-direction: column; gap: var(--s-3); }
+.hero .figure { font-family: var(--font-display); font-size: var(--text-display);
+  line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; }
+.hero .note { color: var(--fg-2); }
+
+/* ---------- surfaces ---------- */
+.card { border: var(--hairline); background: var(--bg); padding: var(--s-4);
+  display: flex; flex-direction: column; gap: var(--s-3); }
+.card__title { font-family: var(--font-mono); font-size: var(--text-label);
+  text-transform: uppercase; letter-spacing: 0.02em; color: var(--fg-3); }
+.grid { display: grid; gap: var(--s-4); align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+/* key/value rows: label left, value right, hairline between */
+.kv { display: flex; justify-content: space-between; gap: var(--s-4);
+  padding: var(--s-2) 0; border-bottom: var(--hairline); }
+.kv:last-child { border-bottom: 0; }
+.kv__k { font-family: var(--font-mono); font-size: var(--text-label); text-transform: uppercase;
+  color: var(--fg-3); }
+.kv__v { font-family: var(--font-mono); font-size: 12px; }
+
+/* ---------- controls ---------- */
+.btn {
+  font-family: var(--font-mono); font-size: var(--text-label); text-transform: uppercase;
+  letter-spacing: 0.02em; padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--fg); background: transparent; color: var(--fg); cursor: pointer;
+}
+.btn:hover { background: var(--sel); }
+.btn--primary { background: var(--fg); color: var(--bg); }
+.btn--quiet { border-color: var(--rule); color: var(--fg-2); }
+.btn[disabled] { border-color: var(--rule); color: var(--fg-3); cursor: default; background: none; }
+
+/* ---------- status: a word and a square, never a traffic light ---------- */
+.status { display: inline-flex; align-items: center; gap: var(--s-2);
+  font-family: var(--font-mono); font-size: var(--text-label); text-transform: uppercase; }
+.status::before { content: ''; width: 6px; height: 6px; background: var(--fg); }
+.status--off { color: var(--fg-3); }
+.status--off::before { background: var(--fg-3); }
+.status--down { color: var(--red); }
+.status--down::before { background: var(--red); }
+
+/* ---------- the interrupt: at most ONE per screen ---------- */
+.banner { border: 1px solid var(--red); color: var(--red); padding: var(--s-3) var(--s-4);
+  font-family: var(--font-mono); font-size: var(--text-label); text-transform: uppercase;
+  letter-spacing: 0.02em; }
+
+/* ---------- empty and muted ---------- */
+.muted { color: var(--fg-3); }
+.empty { color: var(--fg-3); font-family: var(--font-mono); font-size: 12px;
+  padding: var(--s-8) 0; text-align: center; border: var(--hairline); }
+
+/* ---------- phone ---------- */
+@media (max-width: 720px) {
+  .app { grid-template-columns: 1fr; }
+  .rail { border-right: 0; border-bottom: var(--hairline); flex-direction: row;
+    align-items: center; gap: var(--s-4); overflow-x: auto; padding: var(--s-3) var(--s-4); }
+  .rail__nav { flex-direction: row; }
+  .main { padding: var(--s-4); gap: var(--s-6); }
+  .hero .figure { font-size: 48px; }
+}

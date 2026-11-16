@@ -22,7 +22,7 @@ dashboard side has to agree on where it lives or a non-default profile's folder
 would be invisible to its own agent (see _shared_hermes_home()).
 
 An older version of this plugin put each profile's folder directly in the home
-directory (e.g. /root/personal). The first /folder call for such a profile now
+directory (e.g. ~/personal). The first /folder call for such a profile now
 moves that directory on disk into ~/profiles and updates folders.json to match,
 automatically and once; nothing else needs to change for existing profiles.
 
