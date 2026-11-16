@@ -1,0 +1,60 @@
+# Nothing Neu — Hermes CLI/TUI skin for the Neumorphism themes.
+#
+# Destination on the host:  ~/.hermes/skins/nothing-neu.yaml
+# Activate:                 display.skin: nothing-neu   (config.yaml)
+# Schema: the SKIN YAML SCHEMA docstring in hermes_cli/skin_engine.py.
+#
+# Colours are the dark theme's. Under the white theme the dashboard inverts the
+# terminal into the light well, which keeps these hues and flips their lightness.
+# Violet = brand/selection, mint = ok, amber = attention, red = errors only.
+
+name: nothing-neu
+description: Nothing Neu — graphite, soft greys, violet accent
+
+colors:
+  banner_border: "#2A2B30"
+  banner_title: "#EEEEF1"
+  banner_accent: "#A58BFF"
+  banner_dim: "#5F616B"
+  banner_text: "#9A9CA6"
+  ui_accent: "#A58BFF"
+  ui_label: "#9A9CA6"
+  ui_ok: "#5ED3A8"
+  ui_error: "#E5383B"
+  ui_warn: "#F2B84B"
+  prompt: "#EEEEF1"
+  input_rule: "#2A2B30"
+  response_border: "#A58BFF"
+  status_bar_bg: "#18191C"
+  status_bar_text: "#9A9CA6"
+  status_bar_strong: "#EEEEF1"
+  status_bar_dim: "#5F616B"
+  status_bar_good: "#5ED3A8"
+  status_bar_warn: "#F2B84B"
+  status_bar_bad: "#F2B84B"
+  status_bar_critical: "#E5383B"
+  session_label: "#9A9CA6"
+  session_border: "#5F616B"
+  voice_status_bg: "#18191C"
+  selection_bg: "#2E2A45"
+  completion_menu_bg: "#18191C"
+  completion_menu_current_bg: "#2E2A45"
+  completion_menu_meta_bg: "#18191C"
+  completion_menu_meta_current_bg: "#2E2A45"
+
+spinner:
+  waiting_faces: ["(●  )", "( ● )", "(  ●)", "( ● )"]
+  thinking_faces: ["(◐)", "(◓)", "(◑)", "(◒)"]
+  thinking_verbs: ["reading", "routing", "measuring", "checking", "composing"]
+
+branding:
+  agent_name: "Hermes"
+  welcome: "Hermes. Type a message, or /help for commands."
+  goodbye: "Off."
+  response_label: " ● Hermes "
+  prompt_symbol: "›"
+  help_header: "[?] Commands"
+
+tool_prefix: "│"
+
+banner_logo: "[#A58BFF]HERMES[/]"   # one span: newer TUIs put each span on its own line

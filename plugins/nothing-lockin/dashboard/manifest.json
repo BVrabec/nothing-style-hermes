@@ -1,0 +1,16 @@
+{
+  "name": "nothing-lockin",
+  "label": "Lock In",
+  "description": "Lock In mode: the selected profile's folder as a file tree with upload, download, new file and folder, plus tabs with a text editor, image and PDF viewers, read-only Word and Excel viewers, and the profile's Chat docked next to the files. Opened from the MODE box in the rail; not listed in the menu.",
+  "icon": "FolderOpen",
+  "version": "0.9.6",
+  "tab": {
+    "path": "/lockin",
+    "position": "end",
+    "hidden": true
+  },
+  "slots": [],
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

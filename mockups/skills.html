@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes — Skills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@700&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<!--
+  SKILLS — budget on this screen
+  families: Doto (the "03" only) · Space Mono
+  sizes:    11 label/cell · 14 skill name · 64 hero
+  weights:  400 · 700 (Doto only)
+  greys:    fg-2 · fg-3 · rule · sel
+  red:      none
+  break:    the oversized dot-matrix enabled count
+-->
+<style>
+  html, body { height: 100%; }
+  body { font-family: var(--font-mono); font-weight: 400; font-size: var(--text-body); }
+  .mono { color: var(--fg-3); }
+  .hi { color: var(--fg); }
+  .lo { color: var(--fg-2); }
+
+  .app { display: grid; grid-template-columns: 232px 1fr 360px; height: 100vh; }
+
+  /* ---------- left nav (shell) ---------- */
+  .nav { border-right: 1px solid var(--rule); display: flex; flex-direction: column; min-height: 0; }
+  .brand { padding: var(--s-6) var(--s-4) var(--s-4); display: flex; flex-direction: column; gap: var(--s-1); }
+  .brand .mark { color: var(--fg); letter-spacing: 0.24em; }
+  .switcher { margin: 0 var(--s-4) var(--s-4); border: 1px solid var(--rule); }
+  .switcher .lbl { padding: var(--s-2) var(--s-3) 0; display: flex; justify-content: space-between; }
+  .switcher .cur { padding: var(--s-2) var(--s-3) var(--s-3); }
+  .pname { text-transform: uppercase; letter-spacing: 0.04em; line-height: 1; }
+  .navlist a { display: flex; justify-content: space-between; padding: var(--s-2) var(--s-4); text-decoration: none; border-left: 4px solid transparent; }
+  .navlist a.sel { background: var(--sel); border-left-color: var(--fg); }
+  .navlist a.sel .mono:first-child { color: var(--fg); }
+  .navfoot { margin-top: auto; padding: var(--s-4); border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: var(--s-1); }
+
+  /* ---------- managed-profile banner ---------- */
+  .banner { border-bottom: 1px solid var(--rule); border-top: 4px solid var(--amber); padding: var(--s-2) var(--s-8); display: flex; gap: var(--s-3); align-items: center; }
+  .banner .tag { color: var(--amber); }
+  .banner .path { margin-left: auto; }
+
+  /* ---------- page ---------- */
+  .main { display: flex; flex-direction: column; min-width: 0; }
+  .head { display: flex; align-items: flex-end; gap: var(--s-6); padding: var(--s-12) var(--s-8) var(--s-8); }
+  .head .fig { font-family: var(--font-display); font-weight: 700; font-size: var(--text-display); line-height: 1; letter-spacing: 0.02em; }
+  .head .txt { display: flex; flex-direction: column; gap: var(--s-1); padding-bottom: var(--s-1); }
+  .head .src { margin-left: auto; padding-bottom: var(--s-1); }
+
+  .tools { display: flex; gap: var(--s-4); align-items: center; padding: 0 var(--s-8) var(--s-4); }
+  .search { flex: 1; display: flex; gap: var(--s-3); border: 1px solid var(--rule); padding: var(--s-2) var(--s-3); }
+  .chips { display: flex; border: 1px solid var(--rule); }
+  .chips span { padding: var(--s-2) var(--s-3); border-right: 1px solid var(--rule); }
+  .chips span:last-child { border-right: 0; }
+  .chips span.on { background: var(--fg); color: var(--bg); }
+
+  .tablewrap { padding: 0 var(--s-8); }
+  table.spec td { font-size: var(--text-label); text-transform: uppercase; color: var(--fg-3); vertical-align: middle; }
+  table.spec td.name { font-size: var(--text-body); text-transform: none; color: var(--fg); }
+  table.spec tr.off td.name { color: var(--fg-2); }
+  table.spec td.lo { color: var(--fg-2); }
+  table.spec tr.sel td { background: var(--sel); }
+  table.spec tr.sel td:first-child { box-shadow: inset 4px 0 0 var(--fg); }
+  .badge { border: 1px solid var(--rule); padding: 1px 6px; color: var(--fg-2); }
+  .badge.local { border-color: var(--fg-2); color: var(--fg); }
+  .toggle { border-color: var(--fg-3); }
+  .toggle.on { border-color: var(--fg); }
+  .toggle:not(.on) span { background: var(--fg-3); }
+  table.spec td.act { color: var(--fg); }
+
+  .foot { margin-top: auto; padding: var(--s-3) var(--s-8); border-top: 1px solid var(--rule); display: flex; gap: var(--s-6); }
+
+  /* ---------- inspector ---------- */
+  .insp { border-left: 1px solid var(--rule); display: flex; flex-direction: column; min-height: 0; }
+  .insp .sec { padding: var(--s-4); border-bottom: 1px solid var(--rule); display: flex; flex-direction: column; gap: var(--s-2); }
+  .kv { display: grid; grid-template-columns: 11ch 1fr; gap: var(--s-2); }
+  .md { background: var(--sel); padding: var(--s-3); white-space: pre; font-size: var(--text-label); color: var(--fg-2); line-height: 1.7; }
+  .md .k { color: var(--fg-3); }
+
+  .phonebar { display: none; }
+  .cardlist { display: none; }
+
+  /* ---------- phone ---------- */
+  @media (max-width: 600px) {
+    .app { display: flex; flex-direction: column; height: auto; }
+    .nav, .insp, .tablewrap, .foot { display: none; }
+    .phonebar { display: flex; align-items: center; justify-content: space-between; padding: var(--s-4); border-bottom: 1px solid var(--rule); }
+    .phonebar .btn { border: 1px solid var(--rule); padding: var(--s-2) var(--s-3); }
+    .banner { padding: var(--s-2) var(--s-4); }
+    .head { padding: var(--s-8) var(--s-4) var(--s-6); gap: var(--s-4); }
+    .head .src { display: none; }
+    .tools { flex-direction: column; align-items: stretch; padding: 0 var(--s-4) var(--s-4); gap: var(--s-3); }
+    .chips span { flex: 1; text-align: center; }
+    .hide-ph { display: none; }
+    .cardlist { display: block; border-top: 1px solid var(--rule); }
+    .card { padding: var(--s-4); border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: 1fr auto; gap: var(--s-2) var(--s-4); align-items: center; }
+    .card.sel { background: var(--sel); box-shadow: inset 4px 0 0 var(--fg); }
+    .card .meta { grid-column: 1 / -1; display: flex; gap: var(--s-2); align-items: center; }
+    .card.off .name { color: var(--fg-2); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="nav">
+    <div class="brand">
+      <span class="mono mark">Hermes</span>
+      <span class="mono">hermes · 127.0.0.1:9119</span>
+    </div>
+    <div class="switcher">
+      <div class="lbl"><span class="mono">profile</span><span class="mono">4 ▾</span></div>
+      <div class="cur"><span class="pname">work</span></div>
+    </div>
+    <div class="navlist">
+      <a href="#"><span class="mono">Status</span></a>
+      <a href="#"><span class="mono">Chat</span></a>
+      <a href="#"><span class="mono">Sessions</span></a>
+      <a href="#"><span class="mono">Config</span></a>
+      <a href="#"><span class="mono">API Keys</span></a>
+      <a href="#" class="sel"><span class="mono">Skills</span><span class="mono">03</span></a>
+      <a href="#"><span class="mono">MCP</span></a>
+      <a href="#"><span class="mono">Cron</span><span class="mono">01</span></a>
+      <a href="#"><span class="mono">Profiles</span></a>
+      <a href="#"><span class="mono">Analytics</span></a>
+      <a href="#"><span class="mono">Logs</span></a>
+      <a href="#"><span class="mono">Webhooks</span></a>
+      <a href="#"><span class="mono">Pairing</span></a>
+      <a href="#"><span class="mono">Channels</span></a>
+      <a href="#"><span class="mono">System</span></a>
+    </div>
+    <div class="navfoot">
+      <span class="mono">gateway · work · running</span>
+      <span class="mono">telegram · 1 dm</span>
+    </div>
+  </nav>
+
+  <div class="phonebar">
+    <span class="mono btn">Menu</span>
+    <span class="mono hi">Skills</span>
+    <span class="mono">work ▾</span>
+  </div>
+
+  <section class="main">
+    <div class="banner">
+      <span class="mono tag">Managed profile · work</span>
+      <span class="mono hide-ph">toggles and installs write here</span>
+      <span class="mono path hide-ph">~/.hermes/profiles/work/skills/</span>
+    </div>
+
+    <div class="head">
+      <span class="fig">03</span>
+      <div class="txt">
+        <span class="mono hi">enabled in work</span>
+        <span class="mono">of 06 in the library · 03 available to install</span>
+      </div>
+      <span class="mono src">get /api/skills</span>
+    </div>
+
+    <div class="tools">
+      <div class="search"><span class="mono">/</span><span class="mono">search name, description, origin</span></div>
+      <div class="chips"><span class="mono on">All 06</span><span class="mono">Installed 03</span><span class="mono">Available 03</span></div>
+      <div class="chips hide-ph"><span class="mono">Hub</span><span class="mono">Local</span></div>
+    </div>
+
+    <div class="tablewrap">
+      <table class="spec">
+        <tr><th>state</th><th>name</th><th>does</th><th>origin</th><th>installed in</th><th></th></tr>
+        <tr class="sel"><td><div class="toggle on"><span></span></div></td><td class="name">github</td><td class="lo">issues · pull requests · repos</td><td><span class="badge">hub</span></td><td class="lo">work</td><td class="act">inspect</td></tr>
+        <tr><td><div class="toggle on"><span></span></div></td><td class="name">pdf</td><td class="lo">read · split · fill pdf files</td><td><span class="badge">hub</span></td><td class="lo">work</td><td>inspect</td></tr>
+        <tr><td><div class="toggle on"><span></span></div></td><td class="name">xlsx</td><td class="lo">read · write spreadsheets</td><td><span class="badge">hub</span></td><td class="lo">work</td><td>inspect</td></tr>
+        <tr class="off"><td>not installed</td><td class="name">school-schedule</td><td>rapla timetable · rooms · europe/ljubljana</td><td><span class="badge local">local</span></td><td>school</td><td class="act">install</td></tr>
+        <tr class="off"><td>not installed</td><td class="name">obsidian</td><td>read · write an obsidian vault</td><td><span class="badge">hub</span></td><td>private</td><td class="act">install</td></tr>
+        <tr class="off"><td>not installed</td><td class="name">home-assistant</td><td>lights · sensors · assist</td><td><span class="badge">hub</span></td><td>private</td><td class="act">install</td></tr>
+      </table>
+    </div>
+
+    <div class="cardlist">
+      <div class="card sel"><span class="name hi">github</span><div class="toggle on"><span></span></div><div class="meta"><span class="badge mono">hub</span><span class="mono lo">issues · pull requests · repos</span></div></div>
+      <div class="card"><span class="name hi">pdf</span><div class="toggle on"><span></span></div><div class="meta"><span class="badge mono">hub</span><span class="mono lo">read · split · fill pdf files</span></div></div>
+      <div class="card"><span class="name hi">xlsx</span><div class="toggle on"><span></span></div><div class="meta"><span class="badge mono">hub</span><span class="mono lo">read · write spreadsheets</span></div></div>
+      <div class="card off"><span class="name">school-schedule</span><span class="mono hi">install</span><div class="meta"><span class="badge local mono">local</span><span class="mono">in school · rapla timetable</span></div></div>
+      <div class="card off"><span class="name">obsidian</span><span class="mono hi">install</span><div class="meta"><span class="badge mono">hub</span><span class="mono">in private · obsidian vault</span></div></div>
+      <div class="card off"><span class="name">home-assistant</span><span class="mono hi">install</span><div class="meta"><span class="badge mono">hub</span><span class="mono">in private · lights · sensors</span></div></div>
+    </div>
+
+    <div class="foot">
+      <span class="mono">put /api/skills/toggle</span>
+      <span class="mono">a toggle changes work only · school and private keep their own library</span>
+    </div>
+  </section>
+
+  <!-- ── inspector: the selected skill ───────────────────────── -->
+  <aside class="insp">
+    <div class="sec">
+      <span class="mono">inspect</span>
+      <span class="hi">github</span>
+      <span class="mono lo">issues · pull requests · repos</span>
+    </div>
+    <div class="sec">
+      <div class="kv"><span class="mono">state</span><span class="mono hi">enabled</span></div>
+      <div class="kv"><span class="mono">origin</span><span class="mono lo">hub</span></div>
+      <div class="kv"><span class="mono">profile</span><span class="mono lo">work</span></div>
+      <div class="kv"><span class="mono">needs</span><span class="mono lo">terminal toolset · gh cli</span></div>
+      <div class="kv"><span class="mono">secret</span><span class="mono lo">github_token in work/.env</span></div>
+    </div>
+    <div class="sec">
+      <span class="mono">skill.md</span>
+      <div class="md"><span class="k">---</span>
+<span class="k">name:</span> github
+<span class="k">description:</span> Work with GitHub issues,
+  pull requests and repositories.
+<span class="k">---</span></div>
+      <span class="mono">~/.hermes/profiles/work/skills/github/</span>
+    </div>
+    <div class="sec">
+      <span class="mono">elsewhere</span>
+      <div class="kv"><span class="mono">school</span><span class="mono">not installed</span></div>
+      <div class="kv"><span class="mono">private</span><span class="mono">not installed</span></div>
+    </div>
+  </aside>
+</div>
+</body>
+</html>

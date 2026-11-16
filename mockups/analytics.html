@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes — Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@700&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<!--
+  ANALYTICS — budget on this screen
+  families: Doto (projected figure only) · Space Mono
+  sizes:    11 label/axis · 14 readout · 64 hero
+  weights:  400 · 700 (Doto only)
+  greys:    fg-2 · fg-3 · rule · sel
+  red:      once — the $5.00 key-limit threshold on the cost line
+  break:    the dot-matrix projected month-end figure
+  charts: static inline SVG, one y-axis each, no dual scales; tooltip shown as a still
+-->
+<style>
+  html, body { height: 100%; }
+  body { font-family: var(--font-mono); font-weight: 400; font-size: var(--text-body); }
+  .mono { color: var(--fg-3); }
+  .hi { color: var(--fg); }
+  .lo { color: var(--fg-2); }
+
+  .app { display: grid; grid-template-columns: 232px 1fr; height: 100vh; }
+
+  /* ---------- left nav (shell) ---------- */
+  .nav { border-right: 1px solid var(--rule); display: flex; flex-direction: column; min-height: 0; }
+  .brand { padding: var(--s-6) var(--s-4) var(--s-4); display: flex; flex-direction: column; gap: var(--s-1); }
+  .brand .mark { color: var(--fg); letter-spacing: 0.24em; }
+  .switcher { margin: 0 var(--s-4) var(--s-4); border: 1px solid var(--rule); }
+  .switcher .lbl { padding: var(--s-2) var(--s-3) 0; display: flex; justify-content: space-between; }
+  .switcher .cur { padding: var(--s-2) var(--s-3) var(--s-3); }
+  .pname { text-transform: uppercase; letter-spacing: 0.04em; line-height: 1; }
+  .navlist a { display: flex; justify-content: space-between; padding: var(--s-2) var(--s-4); text-decoration: none; border-left: 4px solid transparent; }
+  .navlist a.sel { background: var(--sel); border-left-color: var(--fg); }
+  .navlist a.sel .mono:first-child { color: var(--fg); }
+  .navfoot { margin-top: auto; padding: var(--s-4); border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: var(--s-1); }
+
+  /* ---------- page ---------- */
+  .main { display: flex; flex-direction: column; min-width: 0; }
+  .pagehead { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-4) var(--s-8); border-bottom: 1px solid var(--rule); }
+  .pagehead .src { margin-left: auto; }
+  .chips { display: flex; border: 1px solid var(--rule); }
+  .chips span { padding: var(--s-2) var(--s-3); border-right: 1px solid var(--rule); }
+  .chips span:last-child { border-right: 0; }
+  .chips span.on { background: var(--fg); color: var(--bg); }
+
+  .row { display: flex; gap: var(--s-8); padding: var(--s-8) var(--s-8) 0; }
+  .panel { display: flex; flex-direction: column; gap: var(--s-3); }
+  .panel .cap { display: flex; justify-content: space-between; }
+  .side { flex: 1; display: flex; flex-direction: column; gap: var(--s-6); padding-top: var(--s-6); }
+  .fig { font-family: var(--font-display); font-weight: 700; font-size: var(--text-display); line-height: 1; letter-spacing: 0.02em; }
+  .kv { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--rule); padding-bottom: var(--s-2); }
+
+  svg.chart { display: block; overflow: visible; }
+  svg .grid { stroke: var(--rule); stroke-width: 1; }
+  svg .ax { font-family: var(--font-mono); font-size: var(--text-label); fill: var(--fg-3); letter-spacing: 0.02em; }
+  svg .lbl { font-family: var(--font-mono); font-size: var(--text-label); fill: var(--fg); letter-spacing: 0.02em; }
+  svg .line { fill: none; stroke: var(--fg); stroke-width: 2; stroke-linejoin: round; }
+  svg .proj { stroke: var(--fg-2); stroke-width: 2; stroke-dasharray: 2 6; }
+  svg .limit { stroke: var(--red); stroke-width: 1; }
+  svg .m { fill: var(--fg); stroke: var(--bg); stroke-width: 2; }
+  svg .pm { fill: var(--bg); stroke: var(--fg-2); stroke-width: 1; }
+  svg .tip rect { fill: var(--bg); stroke: var(--fg-2); stroke-width: 1; }
+  svg .bar { fill: var(--fg-3); }
+  svg .bar.now { fill: var(--fg); }
+
+  table.spec th { padding: var(--s-2); }
+  table.spec td { font-size: var(--text-label); text-transform: uppercase; color: var(--fg-3); padding: 6px var(--s-2); text-align: right; }
+  table.spec th:not(:first-child) { text-align: right; }
+  table.spec td:first-child { text-align: left; }
+  table.spec td.lo { color: var(--fg-2); }
+  table.spec td.hi { color: var(--fg); }
+  table.spec tr.now td { background: var(--sel); }
+  .tbl { flex: 1; }
+
+  .phonebar, .ph { display: none; }
+
+  @media (max-width: 600px) {
+    .app { display: flex; flex-direction: column; height: auto; }
+    .nav, .dt, .tbl { display: none; }
+    .ph { display: block; }
+    .phonebar { display: flex; align-items: center; justify-content: space-between; padding: var(--s-4); border-bottom: 1px solid var(--rule); }
+    .phonebar .pb { border: 1px solid var(--rule); padding: var(--s-2) var(--s-3); }
+    .pagehead { padding: var(--s-3) var(--s-4); }
+    .pagehead > .mono:first-child, .pagehead .src { display: none; }
+    .chips { flex: 1; }
+    .chips span { flex: 1; text-align: center; }
+    .row { flex-direction: column; padding: var(--s-6) var(--s-4) 0; gap: var(--s-6); }
+    .side { order: -1; padding-top: 0; gap: var(--s-4); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="nav">
+    <div class="brand">
+      <span class="mono mark">Hermes</span>
+      <span class="mono">hermes · 127.0.0.1:9119</span>
+    </div>
+    <div class="switcher">
+      <div class="lbl"><span class="mono">profile · machine</span><span class="mono">4 ▾</span></div>
+      <div class="cur"><span class="pname">default</span></div>
+    </div>
+    <div class="navlist">
+      <a href="#"><span class="mono">Status</span></a>
+      <a href="#"><span class="mono">Chat</span></a>
+      <a href="#"><span class="mono">Sessions</span></a>
+      <a href="#"><span class="mono">Config</span></a>
+      <a href="#"><span class="mono">API Keys</span></a>
+      <a href="#"><span class="mono">Skills</span></a>
+      <a href="#"><span class="mono">MCP</span></a>
+      <a href="#"><span class="mono">Cron</span><span class="mono">01</span></a>
+      <a href="#"><span class="mono">Profiles</span><span class="mono">04</span></a>
+      <a href="#" class="sel"><span class="mono">Analytics</span></a>
+      <a href="#"><span class="mono">Logs</span></a>
+      <a href="#"><span class="mono">Webhooks</span></a>
+      <a href="#"><span class="mono">Pairing</span></a>
+      <a href="#"><span class="mono">Channels</span></a>
+      <a href="#"><span class="mono">System</span></a>
+    </div>
+    <div class="navfoot">
+      <span class="mono">gateway · work · running</span>
+      <span class="mono">telegram · 1 dm</span>
+    </div>
+  </nav>
+
+  <div class="phonebar">
+    <span class="mono pb">Menu</span>
+    <span class="mono hi">Analytics</span>
+    <span class="mono">default ▾</span>
+  </div>
+
+  <section class="main">
+    <div class="pagehead">
+      <span class="mono hi">Token usage and cost · all profiles</span>
+      <div class="chips"><span class="mono">7 days</span><span class="mono on">This month</span><span class="mono">30 days</span></div>
+      <span class="mono src">get /api/analytics/usage</span>
+    </div>
+
+    <div class="row">
+      <div class="panel">
+        <div class="cap"><span class="mono">cumulative cost · october · measured → projected</span></div>
+        <div class="dt"><svg class="chart" width="920" height="320" viewBox="0 0 920 320" role="img" aria-label="Cumulative cost, October: $1.28 measured, $4.41 projected, key limit $5.00">
+<line x1="44" x2="908" y1="292.0" y2="292.0" class="grid"/>
+<text x="36" y="296.0" text-anchor="end" class="ax">$0</text>
+<line x1="44" x2="908" y1="236.8" y2="236.8" class="grid"/>
+<text x="36" y="240.8" text-anchor="end" class="ax">$1</text>
+<line x1="44" x2="908" y1="181.6" y2="181.6" class="grid"/>
+<text x="36" y="185.6" text-anchor="end" class="ax">$2</text>
+<line x1="44" x2="908" y1="126.4" y2="126.4" class="grid"/>
+<text x="36" y="130.4" text-anchor="end" class="ax">$3</text>
+<line x1="44" x2="908" y1="71.2" y2="71.2" class="grid"/>
+<text x="36" y="75.2" text-anchor="end" class="ax">$4</text>
+<text x="36" y="20.0" text-anchor="end" class="ax">$5</text>
+<text x="44.0" y="312" text-anchor="middle" class="ax">OCT 01</text>
+<text x="245.6" y="312" text-anchor="middle" class="ax">OCT 08</text>
+<text x="447.2" y="312" text-anchor="middle" class="ax">OCT 15</text>
+<text x="648.8" y="312" text-anchor="middle" class="ax">OCT 22</text>
+<text x="850.4" y="312" text-anchor="middle" class="ax">OCT 29</text>
+<line x1="44" x2="908" y1="16.0" y2="16.0" class="limit"/>
+<text x="52" y="8.0" class="lbl">KEY LIMIT $5.00 · RESETS MONTHLY</text>
+<line x1="274.4" x2="274.4" y1="16" y2="292" class="grid"/>
+<polyline points="44.0,292.0 44.0,285.9 72.8,277.1 101.6,272.1 130.4,260.5 159.2,253.4 188.0,248.9 216.8,238.5 245.6,229.1 274.4,221.3" class="line"/>
+<line x1="274.4" y1="221.3" x2="908.0" y2="48.6" class="proj"/>
+<rect x="904.0" y="44.6" width="8" height="8" class="pm"/>
+<text x="896.0" y="52.6" text-anchor="end" class="lbl">$4.41 PROJECTED</text>
+<rect x="270.4" y="217.3" width="8" height="8" class="m"/>
+<g class="tip"><rect x="286.4" y="233.3" width="196" height="46"/><text x="296.4" y="251.3" class="ax">OCT 09 · TODAY</text><text x="296.4" y="268.3" class="lbl">$1.28 TOTAL · +$0.14 TODAY</text></g>
+</svg></div>
+        <div class="ph"><svg class="chart" width="358" height="240" viewBox="0 0 358 240" role="img" aria-label="Cumulative cost, October: $1.28 measured, $4.41 projected, key limit $5.00">
+<line x1="36" x2="354" y1="212.0" y2="212.0" class="grid"/>
+<text x="28" y="216.0" text-anchor="end" class="ax">$0</text>
+<line x1="36" x2="354" y1="172.8" y2="172.8" class="grid"/>
+<text x="28" y="176.8" text-anchor="end" class="ax">$1</text>
+<line x1="36" x2="354" y1="133.6" y2="133.6" class="grid"/>
+<text x="28" y="137.6" text-anchor="end" class="ax">$2</text>
+<line x1="36" x2="354" y1="94.4" y2="94.4" class="grid"/>
+<text x="28" y="98.4" text-anchor="end" class="ax">$3</text>
+<line x1="36" x2="354" y1="55.2" y2="55.2" class="grid"/>
+<text x="28" y="59.2" text-anchor="end" class="ax">$4</text>
+<text x="28" y="20.0" text-anchor="end" class="ax">$5</text>
+<text x="36.0" y="232" text-anchor="middle" class="ax">OCT 01</text>
+<text x="184.4" y="232" text-anchor="middle" class="ax">OCT 15</text>
+<text x="332.8" y="232" text-anchor="middle" class="ax">OCT 29</text>
+<line x1="36" x2="354" y1="16.0" y2="16.0" class="limit"/>
+<text x="44" y="8.0" class="lbl">KEY LIMIT $5.00 · RESETS MONTHLY</text>
+<line x1="120.8" x2="120.8" y1="16" y2="212" class="grid"/>
+<polyline points="36.0,212.0 36.0,207.7 46.6,201.4 57.2,197.9 67.8,189.7 78.4,184.6 89.0,181.4 99.6,174.0 110.2,167.3 120.8,161.8" class="line"/>
+<line x1="120.8" y1="161.8" x2="354.0" y2="39.2" class="proj"/>
+<rect x="350.0" y="35.2" width="8" height="8" class="pm"/>
+<text x="342.0" y="43.2" text-anchor="end" class="lbl">$4.41 PROJECTED</text>
+<rect x="116.8" y="157.8" width="8" height="8" class="m"/>
+<g class="tip"><rect x="132.8" y="173.8" width="196" height="46"/><text x="142.8" y="191.8" class="ax">OCT 09 · TODAY</text><text x="142.8" y="208.8" class="lbl">$1.28 TOTAL · +$0.14 TODAY</text></g>
+</svg></div>
+      </div>
+      <div class="side">
+        <div class="panel">
+          <span class="mono">projected month-end · at this pace</span>
+          <span class="fig">$4.41</span>
+          <span class="mono lo">$0.59 under the key limit</span>
+        </div>
+        <div class="panel">
+          <div class="kv"><span class="mono">measured</span><span class="hi">$1.28</span></div>
+          <div class="kv"><span class="mono">key left</span><span class="hi">$3.72</span></div>
+          <div class="kv"><span class="mono">rates /m</span><span class="lo">$0.15 · $0.60 · $0.003</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="panel">
+        <div class="cap"><span class="mono">tokens / day · in + out</span><span class="mono">oct 01–09</span></div>
+        <div class="dt"><svg class="chart" width="420" height="200" viewBox="0 0 420 200" role="img" aria-label="Daily tokens in and out, October 1 to 9">
+<line x1="40" x2="412" y1="176.0" y2="176.0" class="grid"/>
+<text x="32" y="180.0" text-anchor="end" class="ax">0.0M</text>
+<line x1="40" x2="412" y1="120.0" y2="120.0" class="grid"/>
+<text x="32" y="124.0" text-anchor="end" class="ax">0.4M</text>
+<line x1="40" x2="412" y1="64.0" y2="64.0" class="grid"/>
+<text x="32" y="68.0" text-anchor="end" class="ax">0.8M</text>
+<line x1="40" x2="412" y1="8.0" y2="8.0" class="grid"/>
+<text x="32" y="12.0" text-anchor="end" class="ax">1.2M</text>
+<rect x="42.0" y="100.5" width="37.3" height="75.5" class="bar"/>
+<text x="60.7" y="194" text-anchor="middle" class="ax">01</text>
+<rect x="83.3" y="66.2" width="37.3" height="109.8" class="bar"/>
+<text x="102.0" y="194" text-anchor="middle" class="ax">02</text>
+<rect x="124.7" y="114.2" width="37.3" height="61.8" class="bar"/>
+<text x="143.3" y="194" text-anchor="middle" class="ax">03</text>
+<rect x="166.0" y="31.9" width="37.3" height="144.1" class="bar"/>
+<text x="184.7" y="194" text-anchor="middle" class="ax">04</text>
+<rect x="207.3" y="86.8" width="37.3" height="89.2" class="bar"/>
+<text x="226.0" y="194" text-anchor="middle" class="ax">05</text>
+<rect x="248.7" y="121.1" width="37.3" height="54.9" class="bar"/>
+<text x="267.3" y="194" text-anchor="middle" class="ax">06</text>
+<rect x="290.0" y="45.6" width="37.3" height="130.4" class="bar"/>
+<text x="308.7" y="194" text-anchor="middle" class="ax">07</text>
+<rect x="331.3" y="59.3" width="37.3" height="116.7" class="bar"/>
+<text x="350.0" y="194" text-anchor="middle" class="ax">08</text>
+<rect x="372.7" y="79.9" width="37.3" height="96.1" class="bar now"/>
+<text x="391.3" y="194" text-anchor="middle" class="ax">09</text>
+</svg></div>
+        <div class="ph"><svg class="chart" width="358" height="180" viewBox="0 0 358 180" role="img" aria-label="Daily tokens in and out, October 1 to 9">
+<line x1="40" x2="350" y1="156.0" y2="156.0" class="grid"/>
+<text x="32" y="160.0" text-anchor="end" class="ax">0.0M</text>
+<line x1="40" x2="350" y1="106.7" y2="106.7" class="grid"/>
+<text x="32" y="110.7" text-anchor="end" class="ax">0.4M</text>
+<line x1="40" x2="350" y1="57.3" y2="57.3" class="grid"/>
+<text x="32" y="61.3" text-anchor="end" class="ax">0.8M</text>
+<line x1="40" x2="350" y1="8.0" y2="8.0" class="grid"/>
+<text x="32" y="12.0" text-anchor="end" class="ax">1.2M</text>
+<rect x="42.0" y="89.5" width="30.4" height="66.5" class="bar"/>
+<text x="57.2" y="174" text-anchor="middle" class="ax">01</text>
+<rect x="76.4" y="59.3" width="30.4" height="96.7" class="bar"/>
+<text x="91.7" y="174" text-anchor="middle" class="ax">02</text>
+<rect x="110.9" y="101.6" width="30.4" height="54.4" class="bar"/>
+<text x="126.1" y="174" text-anchor="middle" class="ax">03</text>
+<rect x="145.3" y="29.0" width="30.4" height="127.0" class="bar"/>
+<text x="160.6" y="174" text-anchor="middle" class="ax">04</text>
+<rect x="179.8" y="77.4" width="30.4" height="78.6" class="bar"/>
+<text x="195.0" y="174" text-anchor="middle" class="ax">05</text>
+<rect x="214.2" y="107.6" width="30.4" height="48.4" class="bar"/>
+<text x="229.4" y="174" text-anchor="middle" class="ax">06</text>
+<rect x="248.7" y="41.1" width="30.4" height="114.9" class="bar"/>
+<text x="263.9" y="174" text-anchor="middle" class="ax">07</text>
+<rect x="283.1" y="53.2" width="30.4" height="102.8" class="bar"/>
+<text x="298.3" y="174" text-anchor="middle" class="ax">08</text>
+<rect x="317.6" y="71.4" width="30.4" height="84.6" class="bar now"/>
+<text x="332.8" y="174" text-anchor="middle" class="ax">09</text>
+</svg></div>
+        <div class="cap"><span class="mono">in 5.58M · out 0.70M · cached 8.37M</span></div>
+      </div>
+      <div class="panel tbl">
+        <table class="spec">
+          <tr><th>day</th><th>in</th><th>out</th><th>cached read</th><th>cost</th></tr>
+<tr><td>oct 01</td><td class="lo">0.48M</td><td class="lo">0.06M</td><td>0.72M</td><td class="hi">$0.11</td></tr>
+<tr><td>oct 02</td><td class="lo">0.70M</td><td class="lo">0.09M</td><td>1.05M</td><td class="hi">$0.16</td></tr>
+<tr><td>oct 03</td><td class="lo">0.39M</td><td class="lo">0.05M</td><td>0.59M</td><td class="hi">$0.09</td></tr>
+<tr><td>oct 04</td><td class="lo">0.92M</td><td class="lo">0.11M</td><td>1.37M</td><td class="hi">$0.21</td></tr>
+<tr><td>oct 05</td><td class="lo">0.57M</td><td class="lo">0.07M</td><td>0.85M</td><td class="hi">$0.13</td></tr>
+<tr><td>oct 06</td><td class="lo">0.35M</td><td class="lo">0.04M</td><td>0.52M</td><td class="hi">$0.08</td></tr>
+<tr><td>oct 07</td><td class="lo">0.83M</td><td class="lo">0.10M</td><td>1.24M</td><td class="hi">$0.19</td></tr>
+<tr><td>oct 08</td><td class="lo">0.74M</td><td class="lo">0.09M</td><td>1.11M</td><td class="hi">$0.17</td></tr>
+<tr class="now"><td>oct 09</td><td class="lo">0.61M</td><td class="lo">0.08M</td><td>0.92M</td><td class="hi">$0.14</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

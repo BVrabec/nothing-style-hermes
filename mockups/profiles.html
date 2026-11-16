@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes — Profiles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@700&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<!--
+  PROFILES — budget on this screen
+  families: Doto (the "03" only) · Space Mono
+  sizes:    11 label/data · 24 profile names · 64 hero
+  weights:  400 · 700 (Doto only)
+  greys:    fg-2 · fg-3 · rule · sel
+  red:      none
+  break:    the oversized dot-matrix "03"
+  isolation: three columns that never share a border — the air gap is the point
+-->
+<style>
+  html, body { height: 100%; }
+  body { font-family: var(--font-mono); font-weight: 400; }
+  .mono { color: var(--fg-3); }
+  .hi { color: var(--fg); }
+  .lo { color: var(--fg-2); }
+
+  .app { display: grid; grid-template-columns: 232px 1fr; height: 100vh; }
+
+  /* ---------- left nav (shell) ---------- */
+  .nav { border-right: 1px solid var(--rule); display: flex; flex-direction: column; min-height: 0; }
+  .brand { padding: var(--s-6) var(--s-4) var(--s-4); display: flex; flex-direction: column; gap: var(--s-1); }
+  .brand .mark { color: var(--fg); letter-spacing: 0.24em; }
+  .switcher { margin: 0 var(--s-4) var(--s-4); border: 1px solid var(--rule); }
+  .switcher .lbl { padding: var(--s-2) var(--s-3) 0; display: flex; justify-content: space-between; }
+  .switcher .cur { padding: var(--s-2) var(--s-3) var(--s-3); }
+  .pname { font-size: var(--text-heading); text-transform: uppercase; letter-spacing: 0.04em; line-height: 1; }
+  .navlist a { display: flex; justify-content: space-between; padding: var(--s-2) var(--s-4); text-decoration: none; border-left: 4px solid transparent; }
+  .navlist a.sel { background: var(--sel); border-left-color: var(--fg); }
+  .navlist a.sel .mono:first-child { color: var(--fg); }
+  .navfoot { margin-top: auto; padding: var(--s-4); border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: var(--s-1); }
+
+  /* ---------- page ---------- */
+  .main { display: flex; flex-direction: column; min-width: 0; padding: var(--s-12) var(--s-8) var(--s-8); gap: var(--s-12); }
+
+  .head { display: flex; align-items: flex-end; gap: var(--s-6); }
+  .head .fig { font-family: var(--font-display); font-weight: 700; font-size: var(--text-display); line-height: 1; letter-spacing: 0.02em; }
+  .head .txt { display: flex; flex-direction: column; gap: var(--s-1); padding-bottom: var(--s-1); }
+  .head .act { margin-left: auto; border: 1px solid var(--fg); padding: var(--s-2) var(--s-4); color: var(--fg); }
+
+  .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-8); }
+  .col { border: 1px solid var(--rule); display: flex; flex-direction: column; }
+  .col .top { padding: var(--s-6) var(--s-4) var(--s-4); display: flex; flex-direction: column; gap: var(--s-2); border-bottom: 1px solid var(--rule); }
+  .col .top .row1 { display: flex; justify-content: space-between; align-items: baseline; }
+  .col .path { background: var(--sel); padding: var(--s-2) var(--s-4); border-bottom: 1px solid var(--rule); }
+  .spec { display: flex; flex-direction: column; }
+  .spec .r { display: grid; grid-template-columns: 12ch 1fr; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--rule); align-items: center; }
+  .spec .r:last-child { border-bottom: 0; }
+  .spec .r .mono:last-child { text-align: right; }
+  .stack { display: flex; flex-direction: column; gap: var(--s-2); }
+  .stack .mono { text-align: left !important; }
+  .seg { gap: 2px; }
+  .seg span { height: 8px; background: var(--rule); }
+  .seg span.on { background: var(--fg-2); }
+  .col .act { margin-top: auto; padding: var(--s-3) var(--s-4); border-top: 1px solid var(--rule); display: flex; justify-content: space-between; }
+
+  .machine { border-top: 1px solid var(--rule); padding-top: var(--s-4); display: flex; gap: var(--s-6); flex-wrap: wrap; }
+
+  .phonebar { display: none; }
+
+  /* ---------- phone ---------- */
+  @media (max-width: 600px) {
+    .app { display: flex; flex-direction: column; height: auto; }
+    .nav { display: none; }
+    .phonebar { display: flex; align-items: center; justify-content: space-between; padding: var(--s-4); border-bottom: 1px solid var(--rule); }
+    .phonebar .btn { border: 1px solid var(--rule); padding: var(--s-2) var(--s-3); }
+    .main { padding: var(--s-8) var(--s-4); gap: var(--s-8); }
+    .head { flex-wrap: wrap; gap: var(--s-4); }
+    .head .act { margin-left: 0; }
+    .head .txt .mono:last-child { display: none; }
+    .spec .r { padding: var(--s-2) var(--s-4); }
+    .cols { grid-template-columns: 1fr; gap: var(--s-6); }
+    .col .top { padding: var(--s-4); }
+    .hide-ph, .spec .r.hide-ph, .col .act.hide-ph { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="nav">
+    <div class="brand">
+      <span class="mono mark">Hermes</span>
+      <span class="mono">hermes · 127.0.0.1:9119</span>
+    </div>
+    <div class="switcher">
+      <div class="lbl"><span class="mono">profile · machine</span><span class="mono">4 ▾</span></div>
+      <div class="cur"><span class="pname">default</span></div>
+    </div>
+    <div class="navlist">
+      <a href="#"><span class="mono">Status</span></a>
+      <a href="#"><span class="mono">Chat</span></a>
+      <a href="#"><span class="mono">Sessions</span></a>
+      <a href="#"><span class="mono">Config</span></a>
+      <a href="#"><span class="mono">API Keys</span></a>
+      <a href="#"><span class="mono">Skills</span></a>
+      <a href="#"><span class="mono">MCP</span></a>
+      <a href="#"><span class="mono">Cron</span><span class="mono">01</span></a>
+      <a href="#" class="sel"><span class="mono">Profiles</span><span class="mono">04</span></a>
+      <a href="#"><span class="mono">Analytics</span></a>
+      <a href="#"><span class="mono">Logs</span></a>
+      <a href="#"><span class="mono">Webhooks</span></a>
+      <a href="#"><span class="mono">Pairing</span></a>
+      <a href="#"><span class="mono">Channels</span></a>
+      <a href="#"><span class="mono">System</span></a>
+    </div>
+    <div class="navfoot">
+      <span class="mono">gateway · work · running</span>
+      <span class="mono">telegram · 1 dm</span>
+    </div>
+  </nav>
+
+  <div class="phonebar">
+    <span class="mono btn">Menu</span>
+    <span class="mono hi">Profiles</span>
+    <span class="mono">default ▾</span>
+  </div>
+
+  <section class="main">
+    <div class="head">
+      <span class="fig">03</span>
+      <div class="txt">
+        <span class="mono hi">isolated profiles</span>
+        <span class="mono">own config.yaml · .env · model · skills · memory · cron · sessions · persona</span>
+      </div>
+      <span class="mono act">+ Create profile</span>
+    </div>
+
+    <div class="cols">
+      <!-- school -->
+      <div class="col">
+        <div class="top">
+          <div class="row1"><span class="pname">school</span><span class="mono">gateway off</span></div>
+          <span class="mono lo">classes · timetable · exams</span>
+        </div>
+        <div class="path"><span class="mono">~/.hermes/profiles/school/</span></div>
+        <div class="spec">
+          <div class="r"><span class="mono">model</span><span class="mono hi">deepseek-v4.1-flash</span></div>
+          <div class="r hide-ph"><span class="mono">provider</span><span class="mono lo">openrouter · streamlake</span></div>
+          <div class="r"><span class="mono">skills</span><span class="mono lo">01 · school-schedule</span></div>
+          <div class="r"><span class="mono">mcp</span><span class="mono">—</span></div>
+          <div class="r"><span class="mono">memory</span>
+            <div class="stack">
+              <div class="seg"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              <span class="mono">610 / 2,200 chars</span>
+            </div>
+          </div>
+          <div class="r"><span class="mono">cron</span><span class="mono">00</span></div>
+          <div class="r hide-ph"><span class="mono">gateway</span><span class="mono">□ off</span></div>
+          <div class="r hide-ph"><span class="mono">timezone</span><span class="mono lo">europe/ljubljana</span></div>
+        </div>
+        <div class="act hide-ph"><span class="mono">inspect</span><span class="mono">manage →</span></div>
+      </div>
+
+      <!-- work -->
+      <div class="col">
+        <div class="top">
+          <div class="row1"><span class="pname">work</span><span class="mono hi">■ gateway running</span></div>
+          <span class="mono lo">infrastructure · monitoring · deploys · backups</span>
+        </div>
+        <div class="path"><span class="mono">~/.hermes/profiles/work/</span></div>
+        <div class="spec">
+          <div class="r"><span class="mono">model</span><span class="mono hi">deepseek-v4.1-flash</span></div>
+          <div class="r hide-ph"><span class="mono">provider</span><span class="mono lo">openrouter · streamlake</span></div>
+          <div class="r"><span class="mono">skills</span><span class="mono lo">03 · github · pdf · xlsx</span></div>
+          <div class="r"><span class="mono">mcp</span><span class="mono">—</span></div>
+          <div class="r"><span class="mono">memory</span>
+            <div class="stack">
+              <div class="seg"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              <span class="mono">1,410 / 2,200 chars</span>
+            </div>
+          </div>
+          <div class="r"><span class="mono">cron</span><span class="mono lo">01 · paused</span></div>
+          <div class="r hide-ph"><span class="mono">gateway</span><span class="mono hi">■ telegram · 1 dm</span></div>
+          <div class="r hide-ph"><span class="mono">timezone</span><span class="mono lo">europe/ljubljana</span></div>
+        </div>
+        <div class="act hide-ph"><span class="mono">inspect</span><span class="mono">manage →</span></div>
+      </div>
+
+      <!-- private -->
+      <div class="col">
+        <div class="top">
+          <div class="row1"><span class="pname">private</span><span class="mono">gateway off</span></div>
+          <span class="mono lo">personal · chat · research</span>
+        </div>
+        <div class="path"><span class="mono">~/.hermes/profiles/private/</span></div>
+        <div class="spec">
+          <div class="r"><span class="mono">model</span><span class="mono hi">deepseek-v4.1-flash</span></div>
+          <div class="r hide-ph"><span class="mono">provider</span><span class="mono lo">openrouter · streamlake</span></div>
+          <div class="r"><span class="mono">skills</span><span class="mono lo">02 · obsidian · home assistant</span></div>
+          <div class="r"><span class="mono">mcp</span><span class="mono lo">homeassistant · 16 tools</span></div>
+          <div class="r"><span class="mono">memory</span>
+            <div class="stack">
+              <div class="seg"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span></div>
+              <span class="mono">1,880 / 2,200 chars</span>
+            </div>
+          </div>
+          <div class="r"><span class="mono">cron</span><span class="mono">00</span></div>
+          <div class="r hide-ph"><span class="mono">gateway</span><span class="mono">□ off</span></div>
+          <div class="r hide-ph"><span class="mono">timezone</span><span class="mono lo">europe/ljubljana</span></div>
+        </div>
+        <div class="act hide-ph"><span class="mono">inspect</span><span class="mono">manage →</span></div>
+      </div>
+    </div>
+
+    <div class="machine">
+      <span class="mono hi">default</span>
+      <span class="mono">machine profile · ~/.hermes/</span>
+      <span class="mono">the dashboard's own · no amber banner when selected</span>
+      <span class="mono hide-ph">gateway off · cron 00</span>
+    </div>
+  </section>
+</div>
+</body>
+</html>

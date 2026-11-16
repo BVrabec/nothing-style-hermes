@@ -1,0 +1,32 @@
+/* nothing-settings — the Settings hub. Neumorphism variables come from the
+   nothing-neu themes; the fallbacks keep the page readable under any other. */
+.nhs-page { display: flex; flex-direction: column; gap: 30px; padding: 4px 4px 32px; }
+.nhs-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.nhs-label { font-family: var(--theme-font-mono, monospace); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--neu-fg3, currentColor); }
+.nhs-search { flex: 1; max-width: 420px; display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-radius: 14px; }
+.nhs-search input { flex: 1; min-width: 0; border: 0 !important; outline: none; background: transparent !important; box-shadow: none !important;
+  color: var(--neu-fg, inherit); font: inherit; font-size: 13.5px; padding: 0 !important; }
+.nhs-raised { background: var(--neu-base, transparent); box-shadow: var(--neu-raised, 0 0 0 1px currentColor); border-radius: 22px; }
+.nhs-pressed { background: var(--neu-well, transparent); box-shadow: var(--neu-pressed, inset 0 0 0 1px currentColor); }
+.nhs-sec { display: flex; flex-direction: column; gap: 16px; }
+.nhs-sechead { display: flex; align-items: baseline; justify-content: space-between; }
+.nhs-sechead h2 { font-family: var(--theme-font-display, inherit); font-size: 18px; font-weight: 500; color: var(--neu-fg, inherit); margin: 0; }
+.nhs-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.nhs-tile { display: flex; flex-direction: column; gap: 10px; padding: 20px; min-height: 132px; text-decoration: none;
+  color: var(--neu-fg, inherit); transition: transform .15s; }
+.nhs-tile:hover { transform: translateY(-2px); }
+.nhs-tile:active { box-shadow: var(--neu-pressed, inset 0 0 0 1px currentColor); transform: none; }
+.nhs-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-width: 0; }
+.nhs-ico { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.nhs-ico i { width: 9px; height: 9px; border-radius: 50%; }
+.nhs-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; text-transform: none; }
+.nhs-tile b { font-weight: 400; font-size: 16px; }
+.nhs-tile p { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--neu-fg2, inherit); }
+.nhs-bg-violet { background: var(--neu-violet, currentColor); box-shadow: 0 0 8px var(--neu-violet, transparent); }
+.nhs-bg-sky { background: var(--neu-sky, currentColor); box-shadow: 0 0 8px var(--neu-sky, transparent); }
+.nhs-bg-mint { background: var(--neu-mint, currentColor); box-shadow: 0 0 8px var(--neu-mint, transparent); }
+.nhs-bg-amber { background: var(--neu-amber, currentColor); box-shadow: 0 0 8px var(--neu-amber, transparent); }
+.nhs-bg-fg { background: var(--neu-fg2, currentColor); }
+@media (max-width: 1200px) { .nhs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .nhs-grid { grid-template-columns: 1fr; gap: 16px; } .nhs-search { max-width: none; } }

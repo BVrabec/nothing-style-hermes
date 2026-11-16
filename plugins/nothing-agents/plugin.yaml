@@ -1,0 +1,8 @@
+name: nothing-agents
+version: 1.2.0
+description: >-
+  Named subagents per profile. The dashboard tab (/subagents) edits them; the
+  agent side tells the profile's soul who is on its team and adds one tool,
+  call_subagent, which hands work to that subagent with its model and
+  instructions -- on the soul's provider, or on the subagent's own provider
+  (its own account) when it has one.

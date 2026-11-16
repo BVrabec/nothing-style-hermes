@@ -1,0 +1,22 @@
+{
+  "name": "nothing-hud",
+  "label": "Status",
+  "description": "Companion to the Nothing themes: a Status tab, the wordmark, a Dark/White switch for the Neumorphism themes, and one dot-matrix moment on Chat, Cron, Skills and Analytics. The slot pieces draw nothing under any other theme.",
+  "icon": "Activity",
+  "version": "3.5.3",
+  "tab": {
+    "path": "/status",
+    "position": "end"
+  },
+  "slots": [
+    "header-left",
+    "header-right",
+    "chat:top",
+    "cron:top",
+    "skills:top",
+    "analytics:top"
+  ],
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

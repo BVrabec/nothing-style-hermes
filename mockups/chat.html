@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes — Chat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@700&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<!--
+  CHAT — budget on this screen
+  families: Doto (profile name only) · Space Mono
+  sizes:    11 label · 14 terminal/body · 24 Doto profile name
+  weights:  400 · 700 (Doto only)
+  greys:    fg-2 · fg-3 · rule · sel
+  red:      once — the LIVE (record/active) dot
+  break:    the profile name in dot-matrix
+-->
+<style>
+  html, body { height: 100%; }
+  body { font-family: var(--font-mono); font-weight: 400; font-size: var(--text-body); }
+  .mono { color: var(--fg-3); }
+  .hi { color: var(--fg); }
+  .lo { color: var(--fg-2); }
+
+  .app { display: grid; grid-template-columns: 232px 1fr 320px; height: 100vh; }
+
+  /* ---------- left nav (shell) ---------- */
+  .nav { border-right: 1px solid var(--rule); display: flex; flex-direction: column; min-height: 0; }
+  .brand { padding: var(--s-6) var(--s-4) var(--s-4); display: flex; flex-direction: column; gap: var(--s-1); }
+  .brand .mark { color: var(--fg); letter-spacing: 0.24em; }
+  .switcher { margin: 0 var(--s-4) var(--s-4); border: 1px solid var(--rule); }
+  .switcher .lbl { padding: var(--s-2) var(--s-3) 0; display: flex; justify-content: space-between; }
+  .switcher .cur { padding: var(--s-2) var(--s-3) var(--s-3); display: flex; align-items: center; justify-content: space-between; }
+  .pname { font-family: var(--font-display); font-weight: 700; font-size: var(--text-heading); text-transform: uppercase; letter-spacing: 0.08em; line-height: 1; }
+  .navlist a { display: flex; justify-content: space-between; padding: var(--s-2) var(--s-4); text-decoration: none; border-left: 4px solid transparent; }
+  .navlist a.sel { background: var(--sel); border-left-color: var(--fg); }
+  .navlist a.sel .mono:first-child { color: var(--fg); }
+  .navfoot { margin-top: auto; padding: var(--s-4); border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: var(--s-1); }
+
+  /* ---------- managed-profile banner ---------- */
+  .banner { border-bottom: 1px solid var(--rule); border-top: 4px solid var(--amber); padding: var(--s-2) var(--s-6); display: flex; gap: var(--s-3); align-items: center; }
+  .banner .tag { color: var(--amber); }
+  .banner .path { margin-left: auto; }
+
+  /* ---------- main ---------- */
+  .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .termhead { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-3) var(--s-6); border-bottom: 1px solid var(--rule); }
+  .live { display: flex; align-items: center; gap: var(--s-2); }
+  .ws { margin-left: auto; display: flex; align-items: center; gap: var(--s-3); border: 1px solid var(--rule); padding: var(--s-1) var(--s-3); }
+
+  .term { flex: 1; overflow: hidden; padding: var(--s-6); line-height: 1.7; white-space: pre-wrap; }
+  .term .blk { margin-bottom: var(--s-6); }
+  .term .ps { color: var(--fg-3); }
+  .kv { display: grid; grid-template-columns: 14ch 1fr; color: var(--fg-2); }
+  .tool { display: grid; grid-template-columns: 2ch 11ch 1fr auto; color: var(--fg-2); align-items: center; }
+  .tool .st { color: var(--fg-3); }
+  .tool.run { color: var(--fg); }
+  .tool .seg { width: 96px; margin-right: var(--s-3); }
+  .tool .seg span { height: 8px; background: var(--rule); }
+  .tool .seg span.on { background: var(--fg); }
+  .out { padding-left: 2ch; color: var(--fg-3); }
+  .ans { color: var(--fg); max-width: 78ch; margin: var(--s-3) 0; }
+  .caret { display: inline-block; width: 8px; height: 16px; background: var(--fg); vertical-align: -3px; }
+
+  /* ---------- right rail ---------- */
+  .rail { border-left: 1px solid var(--rule); display: flex; flex-direction: column; min-height: 0; }
+  .railsec { padding: var(--s-4); border-bottom: 1px solid var(--rule); display: flex; flex-direction: column; gap: var(--s-2); }
+  .picker { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--rule); padding: var(--s-2) var(--s-3); }
+  .ctrls { display: flex; border-bottom: 1px solid var(--rule); }
+  .ctrls > div { padding: var(--s-3) var(--s-4); }
+  .ctrls .new { flex: 1; border-right: 1px solid var(--rule); }
+  .ctrls .new .mono { color: var(--fg); }
+  .shead { padding: var(--s-4) var(--s-4) var(--s-2); display: flex; justify-content: space-between; }
+  .srow { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--rule); border-left: 4px solid transparent; }
+  .srow.on { background: var(--sel); border-left-color: var(--fg); }
+  .srow .t { color: var(--fg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .srow.on .t { color: var(--fg); }
+  .srow .meta { display: flex; gap: var(--s-2); margin-top: var(--s-1); }
+
+  .phonebar, .phonefoot { display: none; }
+
+  /* ---------- phone: a layout of its own ---------- */
+  @media (max-width: 600px) {
+    .app { display: flex; flex-direction: column; }
+    .main { flex: 1; }
+    .ws .mono:first-child { display: none; }
+    .nav, .rail { display: none; }
+    .phonebar { display: flex; align-items: center; justify-content: space-between; padding: var(--s-4); border-bottom: 1px solid var(--rule); }
+    .phonebar .p { display: flex; flex-direction: column; gap: var(--s-1); }
+    .phonebar .btn { border: 1px solid var(--rule); padding: var(--s-2) var(--s-3); }
+    .phonebar .btn.r { color: var(--fg); }
+    .banner { padding: var(--s-2) var(--s-4); }
+    .banner .txt { display: none; }
+    .termhead { padding: var(--s-3) var(--s-4); gap: var(--s-3); }
+    .termhead .sid { display: none; }
+    .ws { padding: var(--s-1) var(--s-2); }
+    .term { padding: var(--s-4); }
+    .term .blk { margin-bottom: var(--s-4); }
+    .kv { grid-template-columns: 12ch 1fr; }
+    .tool { grid-template-columns: 2ch 10ch 1fr; }
+    .tool .arg { grid-column: 2 / -1; }
+    .tool .tm { display: none; }
+    .tool .seg { grid-column: 2 / -1; width: 100%; margin: var(--s-1) 0 0; }
+    .hide-ph { display: none; }
+    .phonefoot { display: flex; justify-content: space-between; padding: var(--s-3) var(--s-4); border-top: 1px solid var(--rule); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── left navigation ─────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="brand">
+      <span class="mono mark">Hermes</span>
+      <span class="mono">hermes · 127.0.0.1:9119</span>
+    </div>
+
+    <div class="switcher">
+      <div class="lbl"><span class="mono">profile</span><span class="mono">4 ▾</span></div>
+      <div class="cur"><span class="pname">Work</span></div>
+    </div>
+
+    <div class="navlist">
+      <a href="#"><span class="mono">Status</span></a>
+      <a href="#" class="sel"><span class="mono">Chat</span></a>
+      <a href="#"><span class="mono">Sessions</span></a>
+      <a href="#"><span class="mono">Config</span></a>
+      <a href="#"><span class="mono">API Keys</span></a>
+      <a href="#"><span class="mono">Skills</span><span class="mono">03</span></a>
+      <a href="#"><span class="mono">MCP</span></a>
+      <a href="#"><span class="mono">Cron</span><span class="mono">01</span></a>
+      <a href="#"><span class="mono">Profiles</span></a>
+      <a href="#"><span class="mono">Analytics</span></a>
+      <a href="#"><span class="mono">Logs</span></a>
+      <a href="#"><span class="mono">Webhooks</span></a>
+      <a href="#"><span class="mono">Pairing</span></a>
+      <a href="#"><span class="mono">Channels</span></a>
+      <a href="#"><span class="mono">System</span></a>
+    </div>
+
+    <div class="navfoot">
+      <span class="mono">gateway · work · running</span>
+      <span class="mono">telegram · 1 dm</span>
+    </div>
+  </nav>
+
+  <!-- ── phone top bar (replaces nav + rail) ─────────────────── -->
+  <div class="phonebar">
+    <span class="mono btn">Menu</span>
+    <div class="p">
+      <span class="mono">profile ▾</span>
+      <span class="pname">Work</span>
+    </div>
+    <span class="mono btn r">Sessions 05</span>
+  </div>
+
+  <!-- ── main column ─────────────────────────────────────────── -->
+  <section class="main">
+    <div class="banner">
+      <span class="mono tag">Managed profile · work</span>
+      <span class="mono txt">chat · config · api keys · skills · mcp read and write here</span>
+      <span class="mono path hide-ph">~/.hermes/profiles/work/</span>
+    </div>
+
+    <div class="termhead">
+      <span class="live"><span class="dot-red"></span><span class="mono hi">Live</span></span>
+      <span class="mono sid">session 20261009_0732 · cli</span>
+      <span class="ws"><span class="mono">workspace</span><span class="mono hi">~/code/hermes-infra</span><span class="mono">git ▾</span></span>
+    </div>
+
+    <div class="term"><div class="blk"><span class="ps">work › </span>/spend
+<div class="kv"><span>this month</span><span><span class="hi">$1.28</span>  measured</span></div><div class="kv"><span>key balance</span><span>$3.72 of $5.00 · resets monthly</span></div><div class="kv"><span>rates</span><span>$0.15/M in · $0.60/M out · $0.003/M cached</span></div></div><div class="blk"><span class="ps">work › </span>is this profile still pinned to streamlake? check the gateway picked it up.
+<div class="tool"><span class="st">✓</span><span>read_file</span><span class="arg">~/.hermes/profiles/work/config.yaml</span><span class="st tm">0.1s</span></div><div class="out">provider_routing.order: [streamlake]</div><div class="ans">Yes — work is pinned to StreamLake. The model is deepseek/deepseek-v4.1-flash through OpenRouter, so every turn here bills at $0.15/M in and $0.60/M out, cached reads at $0.003/M. Confirming the gateway is running with that route:</div><div class="tool run"><span>›</span><span>terminal</span><span class="arg">systemctl --user status hermes-gateway</span><span class="seg"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span></span></div><span class="caret"></span></div></div>
+
+    <div class="phonefoot">
+      <span class="mono">model</span>
+      <span class="mono hi">deepseek-v4.1-flash · streamlake ▾</span>
+    </div>
+  </section>
+
+  <!-- ── right rail ──────────────────────────────────────────── -->
+  <aside class="rail">
+    <div class="railsec">
+      <span class="mono">model</span>
+      <div class="picker"><span class="hi">deepseek/deepseek-v4.1-flash</span><span class="mono">▾</span></div>
+      <span class="mono">openrouter · pinned streamlake</span>
+    </div>
+
+    <div class="ctrls">
+      <div class="new"><span class="mono">+ New chat</span></div>
+      <div><span class="mono">↻ Refresh</span></div>
+    </div>
+
+    <div class="shead"><span class="mono">sessions · work</span><span class="mono">05</span></div>
+
+    <div class="srow on">
+      <div class="t">StreamLake pin — gateway check</div>
+      <div class="mono meta"><span>now</span><span>·</span><span>6 msgs</span></div>
+    </div>
+    <div class="srow">
+      <div class="t">/spend</div>
+      <div class="mono meta"><span>2h</span><span>·</span><span>2 msgs</span><span>·</span><span>telegram</span></div>
+    </div>
+    <div class="srow">
+      <div class="t">Pin provider to StreamLake</div>
+      <div class="mono meta"><span>yesterday</span><span>·</span><span>18 msgs</span><span>·</span><span>telegram</span></div>
+    </div>
+    <div class="srow">
+      <div class="t">Gateway as systemd user service</div>
+      <div class="mono meta"><span>3d</span><span>·</span><span>41 msgs</span></div>
+    </div>
+    <div class="srow">
+      <div class="t">Proxmox LXC — 2 CPU / 2 GB / 20 GB</div>
+      <div class="mono meta"><span>5d</span><span>·</span><span>27 msgs</span></div>
+    </div>
+  </aside>
+
+</div>
+</body>
+</html>

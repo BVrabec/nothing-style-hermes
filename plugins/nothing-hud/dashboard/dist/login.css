@@ -1,0 +1,88 @@
+/* nothing-hud — the /login page in the Neumorphism × Nothing style.
+   Linked into Hermes's own login page by plugin_api.py (CSS only: the form,
+   its fields and the sign-in script are Hermes's, untouched). Served from the
+   pre-auth /dashboard-plugins/ mount. data-nh-mode on <html> picks dark/white
+   from the dashboard theme in config. */
+@import url("https://fonts.googleapis.com/css2?family=Doto:wght@700&family=Space+Grotesk:wght@400;500&family=Space+Mono&display=swap");
+
+html {
+  --n-base: #1D1E22; --n-well: #18191C; --n-fg: #EEEEF1; --n-fg2: #9A9CA6; --n-fg3: #5F616B;
+  --n-hi: rgba(255, 255, 255, 0.055); --n-lo: rgba(0, 0, 0, 0.62);
+  --n-violet: #A58BFF; --n-red: #E5383B;
+}
+html[data-nh-mode="light"] {
+  --n-base: #E7E8EC; --n-well: #DFE0E5; --n-fg: #1B1C20; --n-fg2: #5E6170; --n-fg3: #9A9DA9;
+  --n-hi: rgba(255, 255, 255, 0.95); --n-lo: rgba(163, 167, 181, 0.55);
+  --n-violet: #7A5CFA; --n-red: #D71921;
+}
+html {
+  --n-raised: -7px -7px 16px var(--n-hi), 8px 8px 18px var(--n-lo);
+  --n-raised-sm: -4px -4px 9px var(--n-hi), 4px 4px 10px var(--n-lo);
+  --n-pressed: inset 4px 4px 9px var(--n-lo), inset -4px -4px 9px var(--n-hi);
+  /* Hermes's own tokens, re-pointed so anything not restyled below still fits */
+  --background-base: var(--n-base) !important; --background: var(--n-base) !important;
+  --midground: var(--n-violet) !important; --foreground: var(--n-fg) !important;
+  --hairline: transparent !important; --hairline-strong: transparent !important;
+}
+
+html, body {
+  background: var(--n-base) !important; background-image: none !important;
+  color: var(--n-fg) !important; font-family: "Space Grotesk", system-ui, sans-serif !important;
+}
+::selection { background: var(--n-violet) !important; color: #FFFFFF !important; }
+main { max-width: 25rem !important; }
+
+/* brand: the dashboard's knob + HERMES instead of Nous · Research */
+.brand {
+  display: flex !important; align-items: center !important; justify-content: center !important; gap: 0 !important;
+  font-size: 0 !important; letter-spacing: 0 !important; margin-bottom: 28px !important; color: transparent !important;
+}
+.brand .dot {
+  width: 40px !important; height: 40px !important; border-radius: 50% !important; flex: none !important;
+  background: radial-gradient(circle, var(--n-violet) 0 4px, transparent 5px), var(--n-base) !important;
+  box-shadow: var(--n-raised-sm), 0 0 0 0 transparent !important; filter: none !important; margin: 0 14px 0 0 !important;
+  order: -1;
+}
+.brand::after {
+  content: "HERMES"; font-family: "Space Mono", monospace; font-size: 13px; letter-spacing: .12em; color: var(--n-fg);
+}
+
+/* the card: raised, soft corners */
+.card {
+  background: var(--n-base) !important; border: 0 !important; border-radius: 28px !important;
+  box-shadow: var(--n-raised) !important; padding: 34px 30px 30px !important;
+}
+.card::before, .card::after { display: none !important; }
+.card h1 {
+  font-family: "Doto", monospace !important; font-weight: 700 !important; text-transform: uppercase !important;
+  font-size: 44px !important; line-height: 1 !important; letter-spacing: .02em !important; color: var(--n-fg) !important;
+  margin: 0 0 12px !important;
+}
+.subtitle { font-family: "Space Grotesk", sans-serif !important; font-size: 14px !important; color: var(--n-fg2) !important; margin: 0 0 24px !important; }
+
+/* form: mono labels, pressed wells, violet button */
+.form-title, .field-label {
+  font-family: "Space Mono", monospace !important; font-size: 11px !important; letter-spacing: .08em !important;
+  text-transform: uppercase !important; color: var(--n-fg3) !important;
+}
+.form-title { margin-bottom: 14px !important; }
+.field { gap: 8px !important; }
+.field-input {
+  background: var(--n-well) !important; border: 0 !important; border-radius: 14px !important;
+  box-shadow: var(--n-pressed) !important; color: var(--n-fg) !important; padding: 13px 15px !important;
+  font-family: "Space Grotesk", sans-serif !important; font-size: 15px !important; outline: none !important;
+}
+.field-input:focus { box-shadow: var(--n-pressed), 0 0 0 2px var(--n-violet) !important; }
+.provider-btn {
+  background: var(--n-violet) !important; color: #FFFFFF !important; border: 0 !important; border-radius: 14px !important;
+  box-shadow: var(--n-raised-sm) !important; font-family: "Space Mono", monospace !important; font-size: 12px !important;
+  letter-spacing: .12em !important; text-transform: uppercase !important; padding: 14px 18px !important; margin-top: 6px !important;
+  clip-path: none !important;
+}
+.provider-btn:hover { filter: brightness(1.06) !important; }
+.provider-btn:active { box-shadow: var(--n-pressed) !important; }
+.form-error { color: var(--n-red) !important; font-family: "Space Mono", monospace !important; font-size: 12px !important; }
+
+/* footer */
+footer { font-family: "Space Mono", monospace !important; font-size: 10.5px !important; letter-spacing: .1em !important; color: var(--n-fg3) !important; }
+footer .sep { background: var(--n-fg3) !important; opacity: .4; }

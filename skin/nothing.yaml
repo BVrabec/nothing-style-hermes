@@ -1,0 +1,61 @@
+# Nothing — Hermes CLI/TUI skin, the terminal half of the Nothing theme.
+#
+# Destination on the host:  ~/.hermes/skins/nothing.yaml
+# Activate:                 display.skin: nothing   (config.yaml)  or  /skin nothing
+# Schema: the SKIN YAML SCHEMA docstring in hermes_cli/skin_engine.py. Only keys
+# from that schema are used. The dashboard's Chat tab runs this TUI, so the skin
+# is what colours the terminal there; the dashboard theme cannot reach it.
+#
+# Same rules as the mockups: white on black, four greys, no decorative colour.
+# Red #D71921 is reserved for errors and critical context use. No green, no gold.
+
+name: nothing
+description: Nothing — OLED black, white type, greys, one red interrupt
+
+colors:
+  banner_border: "#1A1A1A"
+  banner_title: "#FFFFFF"
+  banner_accent: "#FFFFFF"
+  banner_dim: "#5A5A5A"
+  banner_text: "#9A9A9A"
+  ui_accent: "#FFFFFF"
+  ui_label: "#9A9A9A"
+  ui_ok: "#FFFFFF"
+  ui_error: "#D71921"
+  ui_warn: "#9A9A9A"
+  prompt: "#FFFFFF"
+  input_rule: "#1A1A1A"
+  response_border: "#5A5A5A"
+  status_bar_bg: "#0D0D0D"
+  status_bar_text: "#9A9A9A"
+  status_bar_strong: "#FFFFFF"
+  status_bar_dim: "#5A5A5A"
+  status_bar_good: "#9A9A9A"
+  status_bar_warn: "#FFFFFF"
+  status_bar_bad: "#FFFFFF"
+  status_bar_critical: "#D71921"
+  session_label: "#9A9A9A"
+  session_border: "#5A5A5A"
+  voice_status_bg: "#0D0D0D"
+  selection_bg: "#1A1A1A"
+  completion_menu_bg: "#0D0D0D"
+  completion_menu_current_bg: "#1A1A1A"
+  completion_menu_meta_bg: "#0D0D0D"
+  completion_menu_meta_current_bg: "#1A1A1A"
+
+spinner:
+  waiting_faces: ["[■□□]", "[□■□]", "[□□■]", "[□■□]"]
+  thinking_faces: ["[■■□]", "[□■■]", "[■□■]"]
+  thinking_verbs: ["reading", "routing", "measuring", "checking", "composing"]
+
+branding:
+  agent_name: "Hermes"
+  welcome: "Hermes. Type a message, or /help for commands."
+  goodbye: "Off."
+  response_label: " ■ Hermes "
+  prompt_symbol: "›"
+  help_header: "[?] Commands"
+
+tool_prefix: "│"
+
+banner_logo: "[#FFFFFF]HERMES[/]"   # one span: newer TUIs put each span on its own line

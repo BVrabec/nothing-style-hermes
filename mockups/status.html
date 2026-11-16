@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes — Status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@700&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<!--
+  STATUS — budget on this screen
+  families: Doto (the spend figure only) · Space Mono
+  sizes:    11 label · 24 readout · 64 hero
+  weights:  400 · 700 (Doto only)
+  greys:    fg-2 · fg-3 · rule · sel
+  red:      none — nothing is wrong today
+  break:    the oversized dot-matrix spend figure
+-->
+<style>
+  html, body { height: 100%; }
+  body { font-family: var(--font-mono); font-weight: 400; }
+  .mono { color: var(--fg-3); }
+  .hi { color: var(--fg); }
+  .lo { color: var(--fg-2); }
+
+  .app { display: grid; grid-template-columns: 232px 1fr; height: 100vh; }
+
+  /* ---------- left nav (shell) ---------- */
+  .nav { border-right: 1px solid var(--rule); display: flex; flex-direction: column; min-height: 0; }
+  .brand { padding: var(--s-6) var(--s-4) var(--s-4); display: flex; flex-direction: column; gap: var(--s-1); }
+  .brand .mark { color: var(--fg); letter-spacing: 0.24em; }
+  .switcher { margin: 0 var(--s-4) var(--s-4); border: 1px solid var(--rule); }
+  .switcher .lbl { padding: var(--s-2) var(--s-3) 0; display: flex; justify-content: space-between; }
+  .switcher .cur { padding: var(--s-2) var(--s-3) var(--s-3); }
+  .pname { font-size: var(--text-heading); text-transform: uppercase; letter-spacing: 0.04em; line-height: 1; }
+  .navlist a { display: flex; justify-content: space-between; padding: var(--s-2) var(--s-4); text-decoration: none; border-left: 4px solid transparent; }
+  .navlist a.sel { background: var(--sel); border-left-color: var(--fg); }
+  .navlist a.sel .mono:first-child { color: var(--fg); }
+  .navfoot { margin-top: auto; padding: var(--s-4); border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: var(--s-1); }
+
+  /* ---------- page ---------- */
+  .main { display: flex; flex-direction: column; min-width: 0; }
+  .pagehead { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-4) var(--s-8); border-bottom: 1px solid var(--rule); }
+  .pagehead .src { margin-left: auto; }
+  .ok { display: inline-block; width: 6px; height: 6px; background: var(--fg); }
+
+  .band { padding: var(--s-8); border-bottom: 1px solid var(--rule); }
+  .top { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-12); padding: var(--s-12) var(--s-8); }
+
+  .hero { display: flex; flex-direction: column; gap: var(--s-4); }
+  .hero .fig { font-family: var(--font-display); font-weight: 700; font-size: var(--text-display); line-height: 1; letter-spacing: 0.02em; }
+  .hero .seg { gap: 3px; }
+  .hero .seg span { height: 12px; background: var(--rule); }
+  .hero .seg span.on { background: var(--fg); }
+  .hero .scale { display: flex; justify-content: space-between; }
+
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); align-self: start; }
+  .cell { border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-2); }
+  .v { font-size: var(--text-heading); line-height: 1; color: var(--fg); display: flex; align-items: baseline; gap: var(--s-2); }
+  .v .mono { letter-spacing: 0.02em; }
+
+  .model { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--s-6); align-items: end; }
+  .model > div { display: flex; flex-direction: column; gap: var(--s-2); }
+
+  .sechead { display: flex; justify-content: space-between; margin-bottom: var(--s-3); }
+  table.spec td { font-size: var(--text-label); text-transform: uppercase; letter-spacing: 0.02em; color: var(--fg-3); }
+  table.spec td.hi { color: var(--fg); }
+  table.spec td.lo { color: var(--fg-2); }
+
+  .foot { display: flex; gap: var(--s-8); padding: var(--s-4) var(--s-8); margin-top: auto; border-top: 1px solid var(--rule); }
+
+  .phonebar { display: none; }
+
+  /* ---------- phone ---------- */
+  @media (max-width: 600px) {
+    .app { display: flex; flex-direction: column; height: auto; min-height: 100vh; }
+    .nav { display: none; }
+    .phonebar { display: flex; align-items: center; justify-content: space-between; padding: var(--s-4); border-bottom: 1px solid var(--rule); }
+    .phonebar .btn { border: 1px solid var(--rule); padding: var(--s-2) var(--s-3); }
+    .pagehead { padding: var(--s-3) var(--s-4); }
+    .pagehead .src { display: none; }
+    .top { grid-template-columns: 1fr; gap: var(--s-8); padding: var(--s-8) var(--s-4); }
+    .band { padding: var(--s-6) var(--s-4); }
+    .model { grid-template-columns: 1fr 1fr 1fr; gap: var(--s-4); }
+    .model > div:first-child { grid-column: 1 / -1; }
+    .model .v { font-size: var(--text-label); }
+    .model > div:first-child .v { font-size: var(--text-heading); }
+    .hide-ph { display: none; }
+    .foot { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="nav">
+    <div class="brand">
+      <span class="mono mark">Hermes</span>
+      <span class="mono">hermes · 127.0.0.1:9119</span>
+    </div>
+    <div class="switcher">
+      <div class="lbl"><span class="mono">profile · machine</span><span class="mono">4 ▾</span></div>
+      <div class="cur"><span class="pname">default</span></div>
+    </div>
+    <div class="navlist">
+      <a href="#" class="sel"><span class="mono">Status</span></a>
+      <a href="#"><span class="mono">Chat</span></a>
+      <a href="#"><span class="mono">Sessions</span></a>
+      <a href="#"><span class="mono">Config</span></a>
+      <a href="#"><span class="mono">API Keys</span></a>
+      <a href="#"><span class="mono">Skills</span></a>
+      <a href="#"><span class="mono">MCP</span></a>
+      <a href="#"><span class="mono">Cron</span><span class="mono">01</span></a>
+      <a href="#"><span class="mono">Profiles</span><span class="mono">04</span></a>
+      <a href="#"><span class="mono">Analytics</span></a>
+      <a href="#"><span class="mono">Logs</span></a>
+      <a href="#"><span class="mono">Webhooks</span></a>
+      <a href="#"><span class="mono">Pairing</span></a>
+      <a href="#"><span class="mono">Channels</span></a>
+      <a href="#"><span class="mono">System</span></a>
+    </div>
+    <div class="navfoot">
+      <span class="mono">gateway · work · running</span>
+      <span class="mono">telegram · 1 dm</span>
+    </div>
+  </nav>
+
+  <div class="phonebar">
+    <span class="mono btn">Menu</span>
+    <span class="mono hi">Status</span>
+    <span class="mono">default ▾</span>
+  </div>
+
+  <section class="main">
+    <div class="pagehead">
+      <span class="ok"></span>
+      <span class="mono hi">All nominal</span>
+      <span class="mono hide-ph">· machine-level · every profile</span>
+      <span class="mono src">get /api/status</span>
+    </div>
+
+    <div class="top">
+      <div class="hero">
+        <span class="mono">spent this month · measured</span>
+        <span class="fig">$1.28</span>
+        <div class="seg">
+          <span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="scale"><span class="mono">$0</span><span class="mono lo">key $3.72 of $5.00 left · resets monthly</span><span class="mono">$5</span></div>
+      </div>
+
+      <div class="grid4">
+        <div class="cell"><span class="mono">gateway</span><span class="v">RUNNING</span><span class="mono">systemd user service · work</span></div>
+        <div class="cell"><span class="mono">uptime</span><span class="v">09:12 <span class="mono">h:m</span></span><span class="mono">since last restart</span></div>
+        <div class="cell"><span class="mono">platforms</span><span class="v">01 <span class="mono">connected</span></span><span class="mono">telegram · 1 dm</span></div>
+        <div class="cell"><span class="mono">active work</span><span class="v">01 <span class="mono">session</span></span><span class="mono">chat · work · tool running</span></div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="model">
+        <div><span class="mono">model · openrouter · pinned provider streamlake</span><span class="v"><span><span class="hide-ph">deepseek/</span>deepseek-v4.1-flash</span></span></div>
+        <div><span class="mono">input</span><span class="v">$0.15 <span class="mono">/m</span></span></div>
+        <div><span class="mono">output</span><span class="v">$0.60 <span class="mono">/m</span></span></div>
+        <div><span class="mono">cached read</span><span class="v">$0.003 <span class="mono">/m</span></span></div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="sechead"><span class="mono">gateways · one process per profile</span><span class="mono hide-ph">not affected by the profile switcher</span></div>
+      <table class="spec">
+        <tr><th>profile</th><th>gateway</th><th>platform</th><th class="hide-ph">cron</th><th class="hide-ph">sessions db</th></tr>
+        <tr><td class="hi">work</td><td class="hi">■ running</td><td class="lo">telegram · 1 dm</td><td class="lo hide-ph">1 paused</td><td class="hide-ph">profiles/work/state.db</td></tr>
+        <tr><td class="lo">school</td><td>□ off</td><td>—</td><td class="hide-ph">—</td><td class="hide-ph">profiles/school/state.db</td></tr>
+        <tr><td class="lo">private</td><td>□ off</td><td>—</td><td class="hide-ph">—</td><td class="hide-ph">profiles/private/state.db</td></tr>
+        <tr><td class="lo">default</td><td>□ off</td><td>—</td><td class="hide-ph">—</td><td class="hide-ph">~/.hermes/state.db</td></tr>
+      </table>
+    </div>
+
+    <div class="foot">
+      <span class="mono">mcp · private · homeassistant · 16 tools</span>
+      <span class="mono">host · lxc on proxmox · debian 13 · 2 cpu / 2 gb / 20 gb</span>
+      <span class="mono">dashboard · localhost only</span>
+    </div>
+  </section>
+</div>
+</body>
+</html>

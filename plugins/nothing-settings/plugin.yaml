@@ -1,0 +1,6 @@
+name: nothing-settings
+version: 1.0.0
+description: >-
+  Dashboard-only Settings hub for the Nothing themes. The agent side is a
+  no-op; this manifest exists so `hermes plugins enable nothing-settings` can
+  add it to plugins.enabled, which is what makes the dashboard serve it.

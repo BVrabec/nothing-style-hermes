@@ -1,0 +1,7 @@
+name: nothing-lockin
+version: 0.9.6
+description: >-
+  Lock In mode for the Hermes dashboard: a VS Code-style view of the selected
+  profile's own folder (<profile's own folder>) with tabs, editor, viewers and
+  the profile's Chat docked next to the files. The agent side adds one short
+  system-prompt section that tells the profile's AI where its folder is.

@@ -1,0 +1,195 @@
+# Nothing — Hermes dashboard theme (stage 2)
+#
+# Destination on the host:  ~/.hermes/dashboard-themes/nothing.yaml
+# Source of truth for the look: mockups/*.html (stage 1, approved).
+# Every key below is documented in SCHEMA/THEME-REFERENCE.md. Nothing else is used.
+# What this file cannot express is listed in INSTALL.md, section 5.
+#
+# Grey roles, as in tokens.css (dark):
+#   #FFFFFF primary text · #9A9A9A secondary · #5A5A5A tertiary/placeholder
+#   #1A1A1A hairlines    · #0D0D0D selected / raised surface
+# Red #D71921 is the interrupt (destructive only). Amber #C8A200 marks the
+# managed-profile warning. No other colour exists.
+
+name: nothing
+label: Nothing
+description: OLED black, monochrome, hairlines, one red interrupt
+
+palette:
+  background: "#000000"            # OLED black canvas
+  midground: "#FFFFFF"             # text, outlines, focus
+  foreground:
+    hex: "#FFFFFF"
+    alpha: 0.0                     # no top-layer highlight
+  warmGlow: "rgba(0, 0, 0, 0)"     # no vignette
+  noiseOpacity: 0                  # no grain: flat black, as in the mockups
+
+typography:
+  # The mockups use two faces only: Space Mono for everything, Doto for one
+  # hero moment per screen. Doto is NOT the display stack — fontDisplay would
+  # put dots on every heading. Doto is loaded here for the nothing-hud plugin.
+  fontSans: '"Space Mono", ui-monospace, monospace'
+  fontMono: '"Space Mono", ui-monospace, monospace'
+  fontDisplay: '"Space Mono", ui-monospace, monospace'
+  fontUrl: "https://fonts.googleapis.com/css2?family=Doto:wght@700&family=Space+Mono:wght@400;700&display=swap"
+  baseSize: "14px"
+  lineHeight: "1.5"
+  letterSpacing: "0"
+
+layout:
+  radius: "0"                      # structure is square
+  density: compact                 # dense, instrument-like rows
+
+layoutVariant: standard            # see INSTALL.md §5: the left nav rail is not reachable
+
+assets:
+  # Not artwork. A marker the nothing-hud plugin reads, so it only draws while
+  # this theme is active (--theme-asset-custom-nothingHud). Documented form:
+  # pre-wrapped gradient expressions are used as-is.
+  custom:
+    nothingHud: "linear-gradient(#000000, #000000)"
+
+componentStyles:
+  # Only properties the shell reads (checked in the 0.19 build): card reads
+  # background/boxShadow/borderImage/clipPath; header and sidebar read
+  # background/borderImage/clipPath. Other buckets are not read, so not set.
+  card:
+    background: "#000000"
+    boxShadow: "inset 0 0 0 1px #1A1A1A"      # hairline frame, no depth
+  header:
+    background: "#000000"
+  sidebar:
+    background: "#000000"
+
+colorOverrides:
+  card: "#000000"
+  cardForeground: "#FFFFFF"
+  popover: "#0D0D0D"
+  popoverForeground: "#FFFFFF"
+  primary: "#FFFFFF"               # the one filled button: white on black
+  primaryForeground: "#000000"
+  secondary: "#0D0D0D"
+  secondaryForeground: "#FFFFFF"
+  muted: "#0D0D0D"
+  mutedForeground: "#9A9A9A"
+  accent: "#1A1A1A"                # hover fill
+  accentForeground: "#FFFFFF"
+  destructive: "#D71921"           # the interrupt
+  destructiveForeground: "#FFFFFF"
+  success: "#FFFFFF"               # healthy is white, never green
+  warning: "#C8A200"               # managed-profile amber, nothing else
+  border: "#1A1A1A"
+  input: "#1A1A1A"
+  ring: "#FFFFFF"
+
+customCSS: |
+  /* Nothing — selector-level chrome the knobs cannot express.
+     Checked against a running Hermes 0.19 dashboard. Targets only stable
+     hooks: CSS variables the dashboard defines, ARIA roles, aria-current,
+     and Tailwind utility class names. */
+
+  /* The dashboard ships its own display faces (Collapse, Mondwest, Rules,
+     Courier). Point every one of them at Space Mono: two faces per screen. */
+  :root {
+    --font-sans: var(--theme-font-sans);
+    --font-mondwest: var(--theme-font-mono);
+    --font-rules-compressed: var(--theme-font-mono);
+    --font-rules-expanded: var(--theme-font-mono);
+    --text-secondary: #9A9A9A;
+  }
+  .font-courier, .font-mondwest, .font-compressed, .font-expanded {
+    font-family: var(--theme-font-mono) !important;
+  }
+  /* Space Mono is wider than the compressed face badges were tracked for. */
+  .font-compressed { letter-spacing: 0.02em !important; }
+
+  /* One text weight. Space Mono is set Regular everywhere. */
+  h1, h2, h3, h4, h5, h6, strong, b, th,
+  .font-medium, .font-semibold, .font-bold { font-weight: 400 !important; }
+
+  /* Utility voice: small labels, table headers, buttons, badges, tabs. */
+  th, label, button,
+  .text-xs.text-muted-foreground,
+  [role="tab"] {
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  /* Status colours are compiled to literal hex in the dashboard's CSS, so
+     colorOverrides cannot reach them. Healthy is white, never green. */
+  [class*="text-success"], [class*="text-emerald-"], [class*="text-green-"] { color: #FFFFFF !important; }
+  [class*="bg-success"], [class*="bg-emerald-"], [class*="bg-green-"] { background-color: transparent !important; }
+  [class*="border-success"], [class*="border-emerald-"], [class*="border-green-"] { border-color: #5A5A5A !important; }
+  /* Attention is amber, unfilled. */
+  [class*="text-warning"], [class*="text-amber-"], [class*="text-yellow-"] { color: #C8A200 !important; }
+  [class*="bg-warning"], [class*="bg-amber-"], [class*="bg-yellow-"] { background-color: transparent !important; }
+  [class*="border-warning"], [class*="border-amber-"], [class*="border-yellow-"] { border-color: #C8A200 !important; }
+  /* Red is the interrupt: errors keep it; a resting delete button does not. */
+  [class*="text-destructive"], [class*="text-red-"] { color: #D71921 !important; }
+  [class*="bg-destructive/"], [class*="bg-red-"] { background-color: transparent !important; }
+  [class*="border-destructive"], [class*="border-red-"] { border-color: #D71921 !important; }
+  button[class*="text-destructive"]:not(:hover),
+  button[class*="text-red-"]:not(:hover) { color: #9A9A9A !important; }
+
+  /* Hairlines, not shadows or bevels. Focus rings are left alone. */
+  .shadow-xs, .shadow-sm, .shadow, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl,
+  [class*="shadow-[inset"] { box-shadow: none !important; }
+
+  /* Focus: 1px solid, 2px offset — visible, not glowy. */
+  :focus-visible { outline: 1px solid var(--color-ring); outline-offset: 2px; }
+
+  /* Mechanical toggles: square thumb and track. */
+  [role="switch"], [role="switch"] > span { border-radius: 0 !important; }
+
+  /* Segmented progress: discrete blocks, never a smooth bar. */
+  [role="progressbar"] {
+    -webkit-mask-image: repeating-linear-gradient(to right, #000 0 6px, transparent 6px 8px);
+            mask-image: repeating-linear-gradient(to right, #000 0 6px, transparent 6px 8px);
+  }
+
+  /* Active nav item: a filled 4px bar on the left edge, no colour change. */
+  a[aria-current="page"] {
+    color: var(--color-card-foreground);
+    background: #0D0D0D;
+    box-shadow: inset 4px 0 0 var(--color-card-foreground) !important;
+  }
+
+  /* Phone top bar: the sidebar (and the wordmark in it) folds into a drawer,
+     so the bar after the menu button carries the wordmark instead. */
+  header button[aria-label="Open navigation"] + span { font-size: 0 !important; letter-spacing: 0; }
+  header button[aria-label="Open navigation"] + span::after {
+    content: "Hermes";
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-card-foreground);
+  }
+
+  /* Chat terminal, first seconds: the TUI paints Hermes's built-in gold theme
+     until its gateway reports ready and hands over skin/nothing.yaml. Where the
+     terminal is rendered as DOM (0.21.5), map that boot palette to Nothing.
+     These are exact inline-colour matches, so nothing else is touched, and the
+     skin's own red (#D71921) is never matched. */
+  [style*="rgb(255, 215, 0)"], [style*="#ffd700" i],
+  [style*="rgb(255, 191, 0)"], [style*="#ffbf00" i],
+  [style*="rgb(255, 248, 220)"], [style*="#fff8dc" i] { color: #FFFFFF !important; }
+  [style*="rgb(218, 165, 32)"], [style*="#daa520" i],
+  [style*="rgb(204, 155, 31)"], [style*="#cc9b1f" i],
+  [style*="rgb(202, 158, 29)"], [style*="#ca9e1d" i],
+  [style*="rgb(215, 168, 29)"], [style*="#d7a81d" i] { color: #9A9A9A !important; }
+  [style*="rgb(205, 127, 50)"], [style*="#cd7f32" i],
+  [style*="rgb(184, 134, 11)"], [style*="#b8860b" i] { color: #5A5A5A !important; }
+
+  /* Placeholders are the tertiary grey. */
+  ::placeholder { color: #5A5A5A !important; opacity: 1; }
+
+  /* Spec-sheet tables: hairlines, no zebra striping. */
+  table { border-collapse: collapse; }
+  tbody tr:nth-child(even) { background: transparent; }
+  th, td { border-bottom: 1px solid var(--color-border); }
+
+  /* Numbers line up like a readout. */
+  body { font-variant-numeric: tabular-nums; }
+
+  ::selection { background: #FFFFFF; color: #000000; }
+  * { scrollbar-width: thin; scrollbar-color: #1A1A1A transparent; }

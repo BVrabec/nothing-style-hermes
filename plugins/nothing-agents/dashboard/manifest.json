@@ -1,0 +1,15 @@
+{
+  "name": "nothing-agents",
+  "label": "Subagents",
+  "description": "Named subagents per profile: the soul on top, its team below. Edit each subagent's model (and the provider it runs on), colour, when it is called and its instructions; set the team rules. The agent side gives the soul a call_subagent tool.",
+  "icon": "Users",
+  "version": "1.2.0",
+  "tab": {
+    "path": "/subagents",
+    "position": "after:chat"
+  },
+  "slots": [],
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

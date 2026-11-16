@@ -1,0 +1,330 @@
+/* nothing-lockin — Lock In mode. Uses the nothing-neu theme variables; the
+   fallbacks keep it usable under any other theme. */
+.nhl-app {
+  --b: var(--neu-base, #1D1E22); --w: var(--neu-well, #18191C); --f: var(--neu-fg, #EEEEF1);
+  --f2: var(--neu-fg2, #9A9CA6); --f3: var(--neu-fg3, #5F616B); --v: var(--neu-violet, #A58BFF);
+  --r: var(--neu-red, #E5383B); --mint: var(--neu-mint, #5ED3A8);
+  --ra: var(--neu-raised, 0 0 0 1px rgba(127,127,127,.3)); --rs: var(--neu-raised-sm, 0 0 0 1px rgba(127,127,127,.3));
+  --pr: var(--neu-pressed, inset 0 0 0 1px rgba(127,127,127,.25));
+  position: fixed; inset: 0; z-index: 70; background: var(--b); color: var(--f);
+  display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; padding: 20px;
+  font-family: var(--theme-font-sans, "Space Grotesk", system-ui, sans-serif); font-size: 14px;
+}
+/* the left column collapsed to a thin rail (round 13): just the knob and a button to bring it back */
+.nhl-app.nhl-rail { grid-template-columns: 56px minmax(0, 1fr); }
+.nhl-rail .nhl-left { align-items: center; }
+.nhl-railbtn { width: 100%; }
+/* the dashboard behind stays mounted but out of the way */
+html.nh-lockin-open body { overflow: hidden; }
+/* the page lives inside the dashboard's content layer, so z-index cannot lift it
+   over the sidebar; while Lock In is open the dashboard chrome is hidden instead
+   (still mounted, so nothing reloads when you switch back) */
+html.nh-lockin-open #app-sidebar,
+html.nh-lockin-open body > div header,
+html.nh-lockin-open [role="banner"] { visibility: hidden !important; }
+
+.nhl-raised { background: var(--b); box-shadow: var(--ra); border-radius: 22px; }
+.nhl-raised-sm { background: var(--b); box-shadow: var(--rs); border-radius: 14px; }
+.nhl-pressed { background: var(--w); box-shadow: var(--pr); border-radius: 14px; }
+.nhl-label { font-family: var(--theme-font-mono, "Space Mono", monospace); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--f3); }
+.nhl-dots { font-family: "Doto", var(--theme-font-mono, monospace); font-weight: 700; text-transform: uppercase; line-height: 1; }
+.nhl-hint { font-family: var(--theme-font-mono, monospace); font-size: 10px; color: var(--f3); }
+.nhl-err { padding: 12px; font-family: var(--theme-font-mono, monospace); font-size: 12px; color: var(--r); }
+
+/* left column */
+.nhl-left { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+.nhl-brand { display: flex; align-items: center; gap: 12px; padding: 4px 6px; }
+.nhl-brand > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.nhl-brandname { font-family: var(--theme-font-mono, monospace); font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+.nhl-knob { width: 38px; height: 38px; border-radius: 50% !important; display: grid; place-items: center; flex: none; }
+.nhl-knob i { width: 8px; height: 8px; border-radius: 50%; background: var(--v); box-shadow: 0 0 10px var(--v); }
+
+.nhl-pdrop { position: relative; }
+.nhl-pbox { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border: 0; cursor: pointer; color: var(--f); text-align: left; font: inherit; }
+.nhl-pbox > span:first-child { display: flex; flex-direction: column; gap: 6px; }
+.nhl-pname { font-size: 20px; }
+.nhl-pmenu { position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 5; padding: 8px; display: flex; flex-direction: column; gap: 4px; border-radius: 16px; }
+.nhl-popt { display: grid; grid-template-columns: 10px 1fr auto; gap: 10px; align-items: center; padding: 9px 10px; border: 0; border-radius: 10px; background: transparent; color: var(--f2); cursor: pointer; text-align: left; font: inherit; }
+.nhl-popt i { width: 7px; height: 7px; border-radius: 50%; background: var(--v); }
+.nhl-popt.on { color: var(--f); background: var(--w); box-shadow: var(--pr); }
+
+.nhl-tree { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px 10px 10px; }
+.nhl-thead { display: flex; align-items: center; gap: 10px; padding: 2px 6px 12px; min-width: 0; }
+.nhl-thead b { font-weight: 400; font-size: 15px; }
+.nhl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--v); box-shadow: 0 0 8px var(--v); flex: none; }
+.nhl-path { margin-left: auto; font-family: var(--theme-font-mono, monospace); font-size: 9.5px; color: var(--f3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.nhl-tools { display: flex; gap: 7px; padding: 0 4px 12px; }
+.nhl-tbtn { width: 36px; height: 36px; display: grid; place-items: center; border: 0; cursor: pointer; color: var(--f2); font-size: 15px; font-family: var(--theme-font-mono, monospace); }
+.nhl-tbtn:disabled { opacity: .4; cursor: default; }
+.nhl-tbtn:active:not(:disabled) { box-shadow: var(--pr); }
+.nhl-primary-ink { color: var(--v); }
+.nhl-danger { color: var(--r) !important; }
+.nhl-rows { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; padding: 0 2px; }
+.nhl-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 10px; font-size: 13px; color: var(--f2); cursor: pointer; min-width: 0; outline: none; }
+.nhl-row.dir { color: var(--f); }
+.nhl-row:hover { color: var(--f); }
+.nhl-row.sel { color: var(--f); background: var(--w); box-shadow: var(--pr); }
+.nhl-row:focus-visible { box-shadow: 0 0 0 2px var(--v); }
+.nhl-dim { color: var(--f3); cursor: default; }
+.nhl-caret { width: 10px; flex: none; color: var(--f3); font-size: 10px; }
+.nhl-kind { width: 30px; flex: none; font-family: var(--theme-font-mono, monospace); font-size: 9.5px; text-transform: uppercase; color: var(--f3); }
+.nhl-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nhl-size { font-family: var(--theme-font-mono, monospace); font-size: 9.5px; color: var(--f3); flex: none; }
+.nhl-empty { display: flex; flex-direction: column; gap: 6px; padding: 18px 12px; color: var(--f2); font-size: 13px; }
+.nhl-hidden { display: flex; align-items: center; gap: 8px; padding: 10px 8px 2px; font-family: var(--theme-font-mono, monospace); font-size: 10px; color: var(--f3); cursor: pointer; }
+.nhl-hidden input { accent-color: var(--v); }
+
+.nhl-box { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; }
+.nhl-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; }
+.nhl-switch button { border: 0; background: transparent; padding: 7px 10px; border-radius: 10px; cursor: pointer; font-family: var(--theme-font-mono, monospace); font-size: 11px; color: var(--f2); }
+.nhl-switch button.on { color: var(--f); background: var(--b); box-shadow: var(--rs); }
+
+.nhl-btn { border: 0; padding: 11px 16px; border-radius: 14px; cursor: pointer; font-family: var(--theme-font-mono, monospace); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--f); }
+.nhl-btn:disabled { opacity: .5; cursor: default; }
+.nhl-primary { background: var(--v); color: #FFFFFF; box-shadow: var(--rs); }
+.nhl-acts { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* main */
+.nhl-main { display: flex; flex-direction: column; gap: 14px; min-width: 0; min-height: 0; }
+.nhl-top { display: flex; align-items: center; gap: 14px; min-height: 22px; padding: 0 4px; }
+.nhl-busy { color: var(--v); }
+.nhl-msg { color: var(--mint); text-transform: none; letter-spacing: .02em; }
+.nhl-bad { color: var(--r); }
+.nhl-stage { flex: 1; min-height: 0; display: grid; place-items: center; padding: 30px; border-radius: 26px; overflow: auto; }
+.nhl-hero { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+.nhl-big { font-size: 56px; letter-spacing: .02em; }
+.nhl-tips { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 640px; }
+.nhl-tip { padding: 10px 16px; font-family: var(--theme-font-mono, monospace); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--f2); }
+.nhl-card { width: min(560px, 100%); padding: 26px; display: flex; flex-direction: column; gap: 16px; }
+.nhl-ctitle { font-size: 22px; word-break: break-all; }
+.nhl-kv { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 10px; }
+.nhl-kv > div { padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; min-width: 0; }
+
+/* tabs, editor and viewers (round 2) */
+.nhl-app { --amber: var(--neu-amber, #F0B45A); }
+.nhl-stage.nhl-ws { display: flex; flex-direction: column; place-items: initial; padding: 0; overflow: hidden; }
+.nhl-tabs { display: flex; gap: 6px; padding: 12px 14px 0; overflow-x: auto; flex: none; scrollbar-width: thin; }
+.nhl-tab { display: flex; align-items: center; flex: none; border-radius: 12px; color: var(--f2); }
+.nhl-tab:hover { color: var(--f); }
+.nhl-tab.on { color: var(--f); background: var(--w); box-shadow: var(--pr); }
+.nhl-tabname { display: flex; align-items: center; gap: 7px; max-width: 210px; padding: 8px 4px 8px 12px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 12px; }
+.nhl-tabx { width: 26px; height: 26px; margin-right: 5px; border: 0; border-radius: 8px; background: transparent; color: var(--f3); font-size: 17px; line-height: 1; cursor: pointer; }
+.nhl-tabx:hover { color: var(--r); }
+.nhl-tabname:focus-visible, .nhl-tabx:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--v); }
+.nhl-udot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--amber); box-shadow: 0 0 7px var(--amber); }
+.nhl-pane { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 12px 14px 14px; }
+/* a window (round 13) can hold a file next to its chats: the file content sits on top of the
+   (hidden but still-mounted) chat frames, filling the same area they do */
+.nhl-pane.nhl-abs { position: absolute; inset: 0; background: var(--w); z-index: 1; }
+.nhl-pane-msg { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 20px; min-height: 0; overflow: auto; }
+.nhl-editor { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.nhl-ebar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: none; }
+.nhl-ebar .nhl-btn { padding: 8px 14px; }
+.nhl-ename { min-width: 0; max-width: 52%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+a.nhl-btn { display: inline-block; text-decoration: none; }
+.nhl-note { flex: none; padding: 9px 12px; border-radius: 12px; background: var(--w); box-shadow: var(--pr); color: var(--amber); font-family: var(--theme-font-mono, monospace); font-size: 11px; }
+.nhl-ta { flex: 1; min-height: 0; width: 100%; box-sizing: border-box; resize: none; border: 0; outline: 0; overflow: auto; padding: 16px 18px; border-radius: 16px; color: var(--f); font-family: var(--theme-font-mono, "Space Mono", monospace); font-size: 13px; line-height: 1.55; tab-size: 2; }
+.nhl-ta:focus-visible { box-shadow: var(--pr), 0 0 0 2px var(--v); }
+.nhl-ta[readonly] { color: var(--f2); }
+
+/* markdown (round 16): a .md file opens as formatted text. Rendered / Source buttons sit
+   in the editor bar, in the same pressed-well style as the rest of the mode. */
+.nhl-seg { display: flex; gap: 4px; padding: 3px; border-radius: 12px; background: var(--w); box-shadow: var(--pr); flex: none; }
+.nhl-segb { border: 0; padding: 6px 12px; border-radius: 9px; background: transparent; color: var(--f3); cursor: pointer;
+  font-family: var(--theme-font-mono, monospace); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+.nhl-segb:hover { color: var(--f); }
+.nhl-segb.on { color: var(--f); background: var(--b); box-shadow: var(--rs); }
+.nhl-segb:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--v); }
+
+.nhl-md { flex: 1; min-height: 0; overflow: auto; padding: 20px 22px; border-radius: 16px; font-size: 13.5px; line-height: 1.65; color: var(--f); }
+.nhl-md:focus-visible { box-shadow: var(--pr), 0 0 0 2px var(--v); }
+.nhl-md > *:first-child { margin-top: 0; }
+.nhl-md > *:last-child { margin-bottom: 0; }
+.nhl-md-empty { display: grid; place-items: center; }
+.nhl-md-p { margin: 0 0 12px; }
+.nhl-md-h { margin: 22px 0 10px; font-weight: 500; line-height: 1.25; }
+.nhl-md-h1 { font-size: 21px; }
+.nhl-md-h2 { font-size: 17.5px; }
+.nhl-md-h3 { font-size: 15.5px; }
+.nhl-md-h4 { font-size: 14px; }
+.nhl-md-h5, .nhl-md-h6 { font-size: 12.5px; color: var(--f2); }
+.nhl-md-h1, .nhl-md-h2 { padding-bottom: 6px; border-bottom: 1px solid rgba(127,127,127,.28); }
+.nhl-md-hr { border: 0; border-top: 1px solid rgba(127,127,127,.28); margin: 20px 0; }
+.nhl-md-a { color: var(--v); text-decoration: underline; text-underline-offset: 2px; }
+.nhl-md-ic { padding: 1px 5px; border-radius: 6px; background: var(--b); box-shadow: var(--rs); color: var(--f2);
+  font-family: var(--theme-font-mono, monospace); font-size: 12px; }
+.nhl-md-pre { position: relative; margin: 0 0 14px; padding: 14px 16px; border-radius: 12px; background: var(--b); box-shadow: var(--rs); overflow: auto; }
+/* the dashboard paints every plain `code` with its accent colour; a fenced block must be flat,
+   so the fill is removed here rather than inherited */
+.nhl-md-pre code { background: transparent; padding: 0; font-family: var(--theme-font-mono, monospace); font-size: 12.5px; line-height: 1.5; color: var(--f2); white-space: pre; }
+.nhl-md-lang { position: absolute; top: 8px; right: 10px; }
+.nhl-md-quote { margin: 0 0 14px; padding: 2px 0 2px 14px; border-left: 2px solid var(--v); color: var(--f2); }
+.nhl-md-list { margin: 0 0 14px; padding-left: 24px; }
+/* the dashboard's own reset drops list markers, so put them back by hand */
+.nhl-md ul.nhl-md-list { list-style: disc outside; }
+.nhl-md ol.nhl-md-list { list-style: decimal outside; }
+.nhl-md ul.nhl-md-list ul.nhl-md-list { list-style: circle outside; }
+.nhl-md-list li { margin: 0 0 6px; padding-left: 2px; }
+.nhl-md-list li::marker { color: var(--f3); }
+.nhl-md-list li > .nhl-md-list { margin: 6px 0 0; }
+.nhl-md-list > li.nhl-md-task { list-style: none outside; padding-left: 0; }
+.nhl-md-box { display: inline-block; width: 12px; height: 12px; margin-right: 8px; border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(127,127,127,.5); vertical-align: -1px; text-align: center;
+  line-height: 12px; font-size: 9px; color: var(--v); }
+.nhl-md-task.done { color: var(--f3); }
+.nhl-md-tblwrap { margin: 0 0 14px; overflow-x: auto; }
+.nhl-md-tbl { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+.nhl-md-tbl th, .nhl-md-tbl td { padding: 6px 10px; border: 1px solid rgba(127,127,127,.28); vertical-align: top; text-align: left; }
+.nhl-md-tbl th { background: var(--b); color: var(--f3); font-family: var(--theme-font-mono, monospace); font-size: 10.5px;
+  letter-spacing: .06em; text-transform: uppercase; font-weight: 400; }
+.nhl-md-img { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 8px; background: var(--b);
+  box-shadow: var(--rs); color: var(--f3); font-family: var(--theme-font-mono, monospace); font-size: 11px; }
+.nhl-md del { color: var(--f3); }
+.nhl-imgwrap { flex: 1; min-height: 0; overflow: auto; display: flex; padding: 16px; border-radius: 16px; }
+.nhl-imgwrap img { margin: auto; display: block; cursor: zoom-in; border-radius: 6px; }
+.nhl-imgwrap.fit img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.nhl-imgwrap:not(.fit) img { cursor: zoom-out; max-width: none; }
+.nhl-pdf { flex: 1; min-height: 0; width: 100%; border: 0; border-radius: 14px; background: #FFFFFF; }
+.nhl-pdfhint { flex: none; }
+
+/* Word and Excel viewers (round 3) */
+.nhl-app { --sky: var(--neu-sky, #6CB8FF); }
+.nhl-chip { border: 0; padding: 6px 12px; border-radius: 999px; background: transparent; color: var(--f2); font-family: var(--theme-font-mono, monospace); font-size: 11px; letter-spacing: .04em; cursor: pointer; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nhl-chip:hover { color: var(--f); }
+.nhl-chip.on { color: var(--sky); background: var(--w); box-shadow: var(--pr); }
+.nhl-chip:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--v); }
+.nhl-chip1 { cursor: default; }
+.nhl-foot { flex: none; padding: 0 4px; }
+
+.nhl-sheetwrap { flex: 1; min-height: 0; overflow: auto; border-radius: 16px; padding: 0 6px 6px; }
+.nhl-grid { border-collapse: separate; border-spacing: 0; min-width: 100%; font-family: var(--theme-font-mono, "Space Mono", monospace); font-size: 12.5px; color: var(--f); }
+.nhl-grid th, .nhl-grid td { padding: 9px 14px; white-space: pre; max-width: 420px; overflow: hidden; text-overflow: ellipsis; border-bottom: 1px solid color-mix(in srgb, var(--f3) 22%, transparent); text-align: left; font-weight: 400; }
+.nhl-grid thead th { position: sticky; top: 0; z-index: 2; background: var(--w); color: var(--f3); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; padding-top: 14px; text-align: center; }
+.nhl-grid th.nhl-rn { position: sticky; left: 0; z-index: 1; background: var(--w); color: var(--f3); font-size: 10.5px; text-align: right; padding-left: 10px; padding-right: 10px; min-width: 34px; }
+.nhl-grid thead th.nhl-rn { z-index: 3; }
+.nhl-grid td.k-n { text-align: right; }
+.nhl-grid td.k-b, .nhl-grid td.k-e { text-align: center; }
+.nhl-grid td.k-e { color: var(--amber); }
+.nhl-grid td.neg { color: var(--r); }
+
+.nhl-docwrap { flex: 1; min-height: 0; overflow: auto; border-radius: 16px; padding: 28px 22px; }
+.nhl-doc { max-width: 780px; margin: 0 auto; font-family: var(--theme-font-sans, "Space Grotesk", system-ui, sans-serif); font-size: 15px; line-height: 1.65; color: var(--f); word-wrap: break-word; overflow-wrap: anywhere; }
+.nhl-doc .b { font-weight: 700; } .nhl-doc .i { font-style: italic; } .nhl-doc .u { text-decoration: underline; } .nhl-doc .k { text-decoration: line-through; }
+.nhl-doc .u.k { text-decoration: underline line-through; }
+.nhl-dp, .nhl-dli { white-space: pre-wrap; margin: 0 0 .7em; }
+.nhl-dli { display: flex; gap: 10px; margin-bottom: .35em; }
+.nhl-dmark { flex: none; min-width: 1.4em; color: var(--f3); text-align: right; font-family: var(--theme-font-mono, monospace); }
+.nhl-dtext { min-width: 0; white-space: pre-wrap; }
+.nhl-dh { margin: 1.2em 0 .5em; line-height: 1.25; font-weight: 400; white-space: pre-wrap; }
+.nhl-dh1 { font-family: "Doto", var(--theme-font-mono, monospace); font-weight: 700; font-size: 30px; text-transform: uppercase; letter-spacing: .02em; }
+.nhl-dh2 { font-size: 22px; } .nhl-dh3 { font-size: 18px; } .nhl-dh4 { font-size: 16px; color: var(--f2); }
+.nhl-dh .b { font-weight: 400; }
+.nhl-dtblwrap { overflow-x: auto; margin: .4em 0 1em; }
+.nhl-dtbl { border-collapse: collapse; width: 100%; font-size: 14px; }
+.nhl-dtbl td { border: 1px solid color-mix(in srgb, var(--f3) 35%, transparent); padding: 8px 12px; vertical-align: top; white-space: pre-wrap; }
+
+/* drop overlay */
+.nhl-drop { position: fixed; inset: 0; z-index: 71; display: grid; place-items: center; background: color-mix(in srgb, var(--b) 60%, transparent); backdrop-filter: blur(3px); pointer-events: none; }
+.nhl-dropbox { width: min(560px, calc(100vw - 40px)); padding: 40px; border-radius: 30px; border: 2px dashed var(--v); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.nhl-dropword { font-size: 46px; color: var(--v); }
+
+@media (max-width: 760px) {
+  .nhl-app { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); overflow-y: auto; padding: 12px; gap: 12px; position: fixed; }
+  .nhl-left { min-height: 0; }
+  .nhl-tree { max-height: 46vh; }
+  .nhl-main { min-height: 50vh; }
+  .nhl-big { font-size: 36px; }
+  .nhl-kv { grid-template-columns: 1fr 1fr; }
+  .nhl-stage.nhl-ws { min-height: 62vh; }
+  .nhl-ta { min-height: 40vh; }
+  .nhl-md { min-height: 40vh; }
+  .nhl-ename { max-width: 100%; }
+}
+
+/* chat panel (round 4) */
+.nhl-work { flex: 1; min-height: 0; min-width: 0; display: flex; gap: 0; }
+.nhl-work > .nhl-stage { flex: 1; min-width: 0; }
+.nhl-split { flex: none; width: 14px; cursor: col-resize; position: relative; touch-action: none; }
+.nhl-split::after { content: ""; position: absolute; left: 6px; top: 50%; height: 44px; width: 3px; margin-top: -22px; border-radius: 2px; background: var(--f3); opacity: .5; }
+.nhl-split:hover::after { background: var(--v); opacity: 1; }
+.nhl-dock { position: relative; flex: none; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; border-radius: 26px; }
+.nhl-dock[hidden] { display: none; }
+.nhl-dock.fill { flex: 1; }
+.nhl-dockbar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; flex: none; }
+.nhl-dockbar .nhl-btn { padding: 8px 14px; white-space: nowrap; }
+.nhl-dockbar .nhl-label { white-space: nowrap; }
+.nhl-frames { position: relative; flex: 1; min-height: 0; background: var(--w); border-radius: 0 0 26px 26px; overflow: hidden; }
+.nhl-chatframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--w); color-scheme: normal; }
+.nhl-chatframe.off { visibility: hidden; pointer-events: none; }
+.nhl-chatframe.veil { opacity: 0; }
+.nhl-chatwait { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--w); color: var(--f3, var(--f2)); font-family: var(--theme-font-mono, monospace); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; pointer-events: none; }
+.nhl-frames > .nhl-pane-msg { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+/* a chat frame floated above the whole app (round 13), positioned by JS to exactly cover whichever
+   window's content area currently wants to show it -- see the frameRects/floatFrames code in LockIn.
+   Doing it this way (one frame per chat, never nested inside a particular window's own element tree)
+   is what lets a chat move between windows without its frame reloading: React only remounts a child when
+   its *parent* changes, and here the parent (LockIn itself) never does, only this box's position does.
+   Transparent and click-through by default so the gaps between windows, and the window's own tab bar and
+   drag-and-drop highlight above it, are never blocked; the chat frame and the resize shield opt back in. */
+.nhl-floatframe { position: fixed; z-index: 3; overflow: hidden; border-radius: 0 0 26px 26px; pointer-events: none; }
+.nhl-floatframe .nhl-chatframe:not(.off) { pointer-events: auto; }
+.nhl-floatframe .nhl-dockshield { pointer-events: auto; }
+.nhl-ctabs { flex: 1; min-width: 0; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: thin; padding: 2px 0; }
+.nhl-ctab { flex: none; display: flex; align-items: center; border-radius: 11px; color: var(--f2); }
+.nhl-ctab.on { color: var(--f); background: var(--w); box-shadow: var(--pr); }
+.nhl-ctabname { max-width: 150px; padding: 7px 4px 7px 11px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 12.5px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nhl-ctabx { border: 0; background: transparent; color: var(--f3); cursor: pointer; padding: 6px 8px 6px 2px; font-size: 14px; line-height: 1; }
+.nhl-ctabx:hover { color: var(--r); }
+.nhl-ctab[draggable] { cursor: grab; }
+/* a file or chat tab being dragged over a window's strip or body (round 13) */
+.nhl-ctabs.over { box-shadow: inset 0 0 0 2px var(--v); border-radius: 12px; }
+.nhl-frames.over { box-shadow: inset 0 0 0 2px var(--v); }
+.nhl-themefloat { display: flex; gap: 2px; padding: 2px; border-radius: 11px; flex: none; }
+.nhl-themefloat button { border: 0; background: transparent; color: var(--f3); width: 26px; height: 18px; border-radius: 9px; cursor: pointer; font-size: 12px; line-height: 1; padding: 0; }
+.nhl-themefloat button.on { color: var(--f); background: var(--w); box-shadow: var(--pr); }
+.nhl-dockshield { position: absolute; inset: 0; z-index: 2; }
+
+/* inside the frame: only the terminal is left of the dashboard */
+html.nhl-embed #app-sidebar,
+html.nhl-embed header,
+html.nhl-embed [role="banner"],
+html.nhl-embed #chat-side-panel,
+html.nhl-embed [data-testid^="shared-metrics-conse"],
+html.nhl-embed .nothing-hud-strip,
+html.nhl-embed .nh-themefloat { display: none !important; }
+html.nhl-embed body { overflow: hidden; }
+html.nhl-embed main > div { padding: 0 !important; }
+
+@media (max-width: 760px) {
+  .nhl-work { flex-direction: column; gap: 12px; }
+  .nhl-split { display: none; }
+  .nhl-dock, .nhl-dock:not(.fill) { width: auto !important; flex: none; height: 70vh; }
+}
+
+/* chats side of the left column (round 6) */
+.nhl-seg { display: flex; gap: 2px; padding: 3px; margin: 0 4px 12px; border-radius: 999px; }
+.nhl-seg .nhl-chip { flex: 1; text-align: center; }
+.nhl-chatside { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.nhl-chatrow { position: relative; }
+.nhl-chatrow.open .nhl-name { color: var(--f); }
+.nhl-opendot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--v); }
+.nhl-chfolder.over, .nhl-sect.over { background: var(--w); box-shadow: var(--pr); }
+.nhl-sect { padding: 10px 10px 4px; border-radius: 10px; }
+.nhl-movebtn { flex: none; border: 0; background: transparent; color: var(--f3); cursor: pointer; font-size: 13px; padding: 2px 4px; border-radius: 6px; opacity: 0; }
+.nhl-chatrow:hover .nhl-movebtn, .nhl-chatrow:focus-within .nhl-movebtn, .nhl-movebtn:focus-visible { opacity: 1; }
+.nhl-movebtn:hover { color: var(--f); }
+@media (hover: none) { .nhl-movebtn { opacity: 1; } }
+.nhl-movemenu { position: absolute; z-index: 8; top: calc(100% + 2px); right: 0; min-width: 190px; max-width: 260px; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: 8px; border-radius: 14px; box-shadow: var(--ra), 0 12px 30px rgba(0,0,0,.28); cursor: default; }
+.nhl-moveopt { text-align: left; border: 0; background: transparent; color: var(--f2); font: inherit; font-size: 12.5px; padding: 7px 9px; border-radius: 9px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nhl-moveopt:hover { color: var(--f); background: var(--w); }
+.nhl-moveopt.on { color: var(--f); box-shadow: var(--pr); }
+.nhl-more { margin: 8px 4px 2px; align-self: stretch; }
+
+/* question boxes in the Lock In style (round 7): new file/folder, rename, delete, replace ... */
+.nhl-modalwrap { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: color-mix(in srgb, var(--b) 62%, transparent); backdrop-filter: blur(4px); }
+.nhl-modal { width: min(440px, 100%); box-sizing: border-box; padding: 24px 24px 22px; border-radius: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--ra), 0 18px 44px rgba(0,0,0,.34); }
+.nhl-modalmsg { font-size: 14px; line-height: 1.5; color: var(--f); white-space: pre-wrap; overflow-wrap: anywhere; }
+.nhl-input { width: 100%; box-sizing: border-box; border: 0; outline: 0; padding: 13px 16px; color: var(--f); font-family: var(--theme-font-mono, "Space Mono", monospace); font-size: 13.5px; }
+.nhl-input:focus-visible { box-shadow: var(--pr), 0 0 0 2px var(--v); }
+.nhl-modalacts { justify-content: flex-end; padding-top: 4px; }
+.nhl-modal .nhl-btn:focus-visible { outline: none; box-shadow: var(--rs), 0 0 0 2px var(--v); }

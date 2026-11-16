@@ -1,0 +1,6 @@
+name: nothing-hud
+version: 1.0.0
+description: >-
+  Dashboard-only companion to the Nothing theme. The agent side is a no-op;
+  this manifest exists so `hermes plugins enable nothing-hud` can add it to
+  plugins.enabled, which is what makes the dashboard serve a user plugin.

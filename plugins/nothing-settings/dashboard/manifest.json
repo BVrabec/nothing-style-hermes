@@ -1,0 +1,14 @@
+{
+  "name": "nothing-settings",
+  "label": "Settings",
+  "description": "One Settings page for the Nothing themes: Models, Profiles, MCP, Plugins, Channels, Pairing, Webhooks, Keys, Config, System, Documentation and Achievements as tiles. Under the Neumorphism themes the sidebar hides those links and keeps this one.",
+  "icon": "Settings",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/hub",
+    "position": "end"
+  },
+  "slots": [],
+  "entry": "dist/index.js",
+  "css": "dist/style.css"
+}
